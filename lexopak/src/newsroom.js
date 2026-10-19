@@ -6,11 +6,9 @@ import { uniqueSlug } from "./util.js";
 // Drafts are made one at a time so a burst of new stories doesn't fire dozens of API calls at once.
 export function createNewsroom(repo, { draft = draftFromLead, log = console } = {}) {
   const queue = [];
-  let running = false;
+  let current = null;
 
-  async function work() {
-    if (running) return;
-    running = true;
+  async function run() {
     while (queue.length) {
       const id = queue.shift();
       const lead = repo.getLead(id);
@@ -26,7 +24,15 @@ export function createNewsroom(repo, { draft = draftFromLead, log = console } = 
         log.error(`[newsroom] lead ${id} failed: ${err.message}`);
       }
     }
-    running = false;
+  }
+
+  // Resolves when the queue is empty.
+  function work() {
+    current ||= run().finally(() => {
+      current = null;
+      if (queue.length) work();
+    });
+    return current;
   }
 
   function enqueue(id) {
@@ -48,10 +54,11 @@ export function createNewsroom(repo, { draft = draftFromLead, log = console } = 
   }
 
   function start() {
-    repo.resetStuckLeads();
+    repo.failStuckLeads();
+    if (!config.pollMinutes) return null;
     poll();
     return setInterval(poll, config.pollMinutes * 60_000);
   }
 
-  return { enqueue, poll, start, isBusy: () => running, queueLength: () => queue.length };
+  return { enqueue, poll, start, drain: () => current || Promise.resolve(), isBusy: () => !!current, queueLength: () => queue.length };
 }

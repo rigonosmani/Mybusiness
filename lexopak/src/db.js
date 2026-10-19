@@ -1,6 +1,19 @@
-import { DatabaseSync } from "node:sqlite";
 import fs from "node:fs";
 import path from "node:path";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+
+// Node 22.13+ has SQLite built in; older Node versions (common on cPanel) use better-sqlite3.
+function openSqlite(file) {
+  try {
+    const { DatabaseSync } = require("node:sqlite");
+    return new DatabaseSync(file);
+  } catch {
+    const Database = require("better-sqlite3");
+    return new Database(file);
+  }
+}
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS leads (
@@ -14,6 +27,7 @@ CREATE TABLE IF NOT EXISTS leads (
   fetched_at TEXT NOT NULL,
   -- new | drafting | drafted | dismissed | failed
   status TEXT NOT NULL DEFAULT 'new',
+  drafting_at TEXT,
   error TEXT,
   article_id INTEGER
 );
@@ -42,7 +56,7 @@ CREATE INDEX IF NOT EXISTS articles_pub ON articles(status, published_at);
 
 export function openDb(dbPath) {
   if (dbPath !== ":memory:") fs.mkdirSync(path.dirname(dbPath), { recursive: true });
-  const db = new DatabaseSync(dbPath);
+  const db = openSqlite(dbPath);
   db.exec("PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON;");
   db.exec(SCHEMA);
   return db;
@@ -76,11 +90,12 @@ export function createRepo(db) {
       return Object.fromEntries(rows.map((r) => [r.status, r.n]));
     },
     setLeadStatus(id, status, error = null) {
-      db.prepare("UPDATE leads SET status = ?, error = ? WHERE id = ?").run(status, error, id);
+      db.prepare("UPDATE leads SET status = ?, error = ?, drafting_at = ? WHERE id = ?").run(status, error, status === "drafting" ? now() : null, id);
     },
-    // Leads left in "drafting" by a crash or restart go back to the queue.
-    resetStuckLeads() {
-      db.prepare("UPDATE leads SET status = 'new' WHERE status = 'drafting'").run();
+    // Drafts take a few minutes; anything "drafting" for over 30 minutes was cut off by a restart.
+    failStuckLeads() {
+      const cutoff = new Date(Date.now() - 30 * 60_000).toISOString();
+      db.prepare("UPDATE leads SET status = 'failed', error = 'Interrupted - try again.' WHERE status = 'drafting' AND (drafting_at IS NULL OR drafting_at < ?)").run(cutoff);
     },
 
     createArticle(a) {

@@ -17,6 +17,6 @@ const app = createApp(repo, newsroom);
 
 app.listen(config.port, () => {
   console.log(`${config.siteName} running on http://localhost:${config.port} (admin: /admin)`);
-  console.log(`Polling sources every ${config.pollMinutes} min, auto-draft ${config.autoDraft ? "ON" : "OFF"}`);
+  console.log(config.pollMinutes ? `Polling sources every ${config.pollMinutes} min, auto-draft ${config.autoDraft ? "ON" : "OFF"}` : "Built-in polling off (POLL_MINUTES=0) - run src/cron.js from cron");
   newsroom.start();
 });

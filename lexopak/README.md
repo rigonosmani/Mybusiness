@@ -21,7 +21,7 @@ nacionale.com sits behind a Cloudflare bot check, so its feed returns `403`. The
 
 ## Run locally
 
-Requires Node.js 22.13 or newer.
+Requires Node.js 20 or newer.
 
 ```bash
 cd lexopak
@@ -32,9 +32,37 @@ npm start                # http://localhost:3000, newsroom at /admin
 
 Other commands: `npm test` runs the tests, and `npm run poll` checks the sources once and prints the result.
 
-## Put it live on lexopak.com
+## Put it live on cPanel shared hosting
 
-The app is one process with a SQLite file, so it needs a host with a **persistent disk**. A small VPS works well (Hetzner, DigitalOcean or similar, about $5/month).
+Your hosting needs **Setup Node.js App** in cPanel (look under *Software*). If it isn't there, the plan can't run Node apps: ask the host to enable it, or use a VPS (next section).
+
+1. **Upload the code.** Download https://github.com/rigonosmani/Mybusiness/archive/refs/heads/lexopak-news-site.zip, upload it in **File Manager** to your home folder and **Extract** it. You now have `Mybusiness-lexopak-news-site/lexopak`.
+2. **Create the app.** In **Setup Node.js App**, click **Create Application** and enter:
+   - Node.js version: the highest available (20 or newer)
+   - Application mode: Production
+   - Application root: `Mybusiness-lexopak-news-site/lexopak`
+   - Application URL: `lexopak.com`
+   - Application startup file: `app.cjs`
+3. **Add environment variables** on the same screen (**Add Variable**):
+   - `ADMIN_PASSWORD`: your newsroom password
+   - `SESSION_SECRET`: 32+ random characters
+   - `ANTHROPIC_API_KEY`: your Claude key
+   - `POLL_MINUTES` = `0` (cron does the checking, see step 5)
+
+   Click **Save**.
+4. Click **Run NPM Install**, then **Restart**. Open https://lexopak.com, and /admin for the newsroom.
+5. **Keep the listener running.** cPanel puts idle apps to sleep, so news checking runs from cron instead. At the top of the app's page, cPanel shows a command like `source /home/USER/nodevenv/Mybusiness-lexopak-news-site/lexopak/20/bin/activate && cd ...`. In **Cron Jobs**, add a job that runs every 5 minutes (`*/5 * * * *`) using that same path:
+   ```
+   cd /home/USER/Mybusiness-lexopak-news-site/lexopak && /home/USER/nodevenv/Mybusiness-lexopak-news-site/lexopak/20/bin/node src/cron.js >> cron.log 2>&1
+   ```
+   Replace `USER` with your cPanel username and `20` with the Node version you picked.
+6. **HTTPS:** in **SSL/TLS Status**, run **AutoSSL** for lexopak.com.
+
+To update later, upload the new files over the old ones and click **Restart**. Your articles are stored in `data/lexopak.db` and are kept; download that file now and then as a backup.
+
+## Put it live on a VPS
+
+The app is one process with a SQLite file, so it needs a host with a **persistent disk** (Hetzner, DigitalOcean or similar, about $5/month).
 
 ```bash
 # on the server, inside a clone of this repo

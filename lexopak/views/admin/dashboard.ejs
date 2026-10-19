@@ -15,7 +15,7 @@
       </li>
     <% }) %>
   </ul>
-  <p class="muted">Checked every <%= config.pollMinutes %> min · auto-draft <%= config.autoDraft ? 'on' : 'off' %> · AI <%= busy ? 'working' : 'idle' %><%= queued ? ', ' + queued + ' queued' : '' %></p>
+  <p class="muted"><%= config.pollMinutes ? "Checked every " + config.pollMinutes + " min" : "Checked by cron job" %> · auto-draft <%= config.autoDraft ? 'on' : 'off' %> · AI <%= busy ? 'working' : 'idle' %><%= queued ? ', ' + queued + ' queued' : '' %></p>
 </section>
 
 <section class="panel">
