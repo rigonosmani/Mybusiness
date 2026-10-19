@@ -1,11 +1,11 @@
 import express from "express";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { config, CATEGORIES } from "./config.js";
-import { t } from "./i18n.js";
-import { SOURCES, sourceStatus, sourceName } from "./sources.js";
-import { renderMarkdown, uniqueSlug, parseSourcesText, isHttpUrl, escapeXml, truncate } from "./util.js";
-import { requireAdmin, sameOrigin, checkPassword, setLoginCookie, clearLoginCookie, loginAllowed, recordFailure } from "./auth.js";
+import { config, CATEGORIES } from "./config.mjs";
+import { t } from "./i18n.mjs";
+import { SOURCES, sourceStatus, sourceName } from "./sources.mjs";
+import { renderMarkdown, uniqueSlug, parseSourcesText, isHttpUrl, escapeXml, truncate } from "./util.mjs";
+import { adminConfigured, requireAdmin, sameOrigin, checkPassword, setLoginCookie, clearLoginCookie, loginAllowed, recordFailure } from "./auth.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const PAGE_SIZE = 20;
@@ -85,10 +85,14 @@ export function createApp(repo, newsroom) {
 
   // ---------- Admin ----------
 
-  app.get("/admin/login", (req, res) => res.render("admin/login", { error: null }));
+  const setupError = () =>
+    adminConfigured() ? null : "The newsroom is not set up yet: add ADMIN_PASSWORD and SESSION_SECRET (at least 32 characters) to the environment variables, then restart the app.";
+
+  app.get("/admin/login", (req, res) => res.render("admin/login", { error: setupError() }));
 
   app.post("/admin/login", (req, res) => {
     if (!loginAllowed(req.ip)) return res.status(429).render("admin/login", { error: "Too many attempts. Try again in 15 minutes." });
+    if (setupError()) return res.status(503).render("admin/login", { error: setupError() });
     if (!checkPassword(req.body.password || "")) {
       recordFailure(req.ip);
       return res.status(401).render("admin/login", { error: "Wrong password." });

@@ -1,6 +1,6 @@
 import Parser from "rss-parser";
-import { config } from "./config.js";
-import { stripHtml, truncate } from "./util.js";
+import { config } from "./config.mjs";
+import { stripHtml, truncate } from "./util.mjs";
 
 // Sites we watch for breaking stories. Only headline, link and the feed's short
 // teaser are stored - as a tip for the editor, never shown on the public site.

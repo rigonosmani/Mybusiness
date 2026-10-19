@@ -3,17 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "description": "Lexopak news site: source listener + AI-assisted original reporting with editor review",
-  "type": "module",
   "engines": {
     "node": ">=20"
   },
   "scripts": {
     "build": "echo \"No build step needed\"",
-    "start": "node --disable-warning=ExperimentalWarning src/server.js",
-    "dev": "node --disable-warning=ExperimentalWarning --watch src/server.js",
-    "poll": "node --disable-warning=ExperimentalWarning src/poll-once.js",
-    "cron": "node --disable-warning=ExperimentalWarning src/cron.js",
-    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.js"
+    "start": "node --disable-warning=ExperimentalWarning src/index.js",
+    "dev": "node --disable-warning=ExperimentalWarning --watch src/index.js",
+    "poll": "node --disable-warning=ExperimentalWarning src/poll-once.mjs",
+    "cron": "node --disable-warning=ExperimentalWarning src/cron.mjs",
+    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.135.0",

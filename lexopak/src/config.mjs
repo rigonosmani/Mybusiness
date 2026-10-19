@@ -1,4 +1,4 @@
-import "./env.js";
+import "./env.mjs";
 
 // All settings come from environment variables (see .env.example).
 export const config = {

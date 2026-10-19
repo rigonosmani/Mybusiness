@@ -5,11 +5,11 @@ process.env.SITE_LANG = "sq";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-const { openDb, createRepo } = await import("../src/db.js");
-const { createNewsroom } = await import("../src/newsroom.js");
-const { createApp } = await import("../src/app.js");
-const { draftFromLead } = await import("../src/ai.js");
-const { slugify, renderMarkdown, parseSourcesText } = await import("../src/util.js");
+const { openDb, createRepo } = await import("../src/db.mjs");
+const { createNewsroom } = await import("../src/newsroom.mjs");
+const { createApp } = await import("../src/app.mjs");
+const { draftFromLead } = await import("../src/ai.mjs");
+const { slugify, renderMarkdown, parseSourcesText } = await import("../src/util.mjs");
 
 const quiet = { info() {}, error() {} };
 const fakeDraft = async (lead) => ({

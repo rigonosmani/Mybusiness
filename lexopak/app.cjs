@@ -1,3 +1,2 @@
-// Startup file for cPanel "Setup Node.js App" (Passenger loads apps with require()).
-process.chdir(__dirname);
-import("./src/server.js");
+// Startup file for cPanel "Setup Node.js App" (same as src/index.js).
+require("./src/index.js");

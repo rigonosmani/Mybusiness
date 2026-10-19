@@ -1,7 +1,7 @@
-import { config } from "./config.js";
-import { draftFromLead } from "./ai.js";
-import { pollAll, sourceName } from "./sources.js";
-import { uniqueSlug } from "./util.js";
+import { config } from "./config.mjs";
+import { draftFromLead } from "./ai.mjs";
+import { pollAll, sourceName } from "./sources.mjs";
+import { uniqueSlug } from "./util.mjs";
 
 // Drafts are made one at a time so a burst of new stories doesn't fire dozens of API calls at once.
 export function createNewsroom(repo, { draft = draftFromLead, log = console } = {}) {

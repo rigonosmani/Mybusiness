@@ -1,7 +1,7 @@
 // Polls every source once and prints what it found. Handy for checking the feeds.
-import { config } from "./config.js";
-import { openDb, createRepo } from "./db.js";
-import { pollAll, sourceStatus } from "./sources.js";
+import { config } from "./config.mjs";
+import { openDb, createRepo } from "./db.mjs";
+import { pollAll, sourceStatus } from "./sources.mjs";
 
 const repo = createRepo(openDb(config.dbPath));
 const ids = await pollAll(repo);

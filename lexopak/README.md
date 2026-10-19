@@ -53,7 +53,7 @@ Your hosting needs **Setup Node.js App** in cPanel (look under *Software*). If i
 4. Click **Run NPM Install**, then **Restart**. Open https://lexopak.com, and /admin for the newsroom.
 5. **Keep the listener running.** cPanel puts idle apps to sleep, so news checking runs from cron instead. At the top of the app's page, cPanel shows a command like `source /home/USER/nodevenv/Mybusiness-lexopak-news-site/lexopak/20/bin/activate && cd ...`. In **Cron Jobs**, add a job that runs every 5 minutes (`*/5 * * * *`) using that same path:
    ```
-   cd /home/USER/Mybusiness-lexopak-news-site/lexopak && /home/USER/nodevenv/Mybusiness-lexopak-news-site/lexopak/20/bin/node src/cron.js >> cron.log 2>&1
+   cd /home/USER/Mybusiness-lexopak-news-site/lexopak && /home/USER/nodevenv/Mybusiness-lexopak-news-site/lexopak/20/bin/node src/cron.mjs >> cron.log 2>&1
    ```
    Replace `USER` with your cPanel username and `20` with the Node version you picked.
 6. **HTTPS:** in **SSL/TLS Status**, run **AutoSSL** for lexopak.com.

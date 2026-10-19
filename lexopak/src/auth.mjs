@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { config } from "./config.js";
+import { config } from "./config.mjs";
 
 const COOKIE = "lx_admin";
 const MAX_AGE_MS = 7 * 24 * 3600 * 1000;
@@ -21,15 +21,17 @@ function readCookie(req, name) {
   return null;
 }
 
+export const adminConfigured = () => !!config.adminPassword && config.sessionSecret.length >= 32;
+
 export function isLoggedIn(req) {
   const token = readCookie(req, COOKIE);
-  if (!token || !config.sessionSecret) return false;
+  if (!token || !adminConfigured()) return false;
   const [expires, sig] = token.split(".");
   return !!sig && safeEqual(sig, sign(expires)) && Number(expires) > Date.now();
 }
 
 export function checkPassword(password) {
-  return !!config.adminPassword && safeEqual(sign(String(password)), sign(config.adminPassword));
+  return adminConfigured() && safeEqual(sign(String(password)), sign(config.adminPassword));
 }
 
 export function setLoginCookie(res, secure) {

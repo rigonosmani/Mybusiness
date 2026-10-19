@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { config, CATEGORIES } from "./config.js";
-import { sourceName } from "./sources.js";
+import { config, CATEGORIES } from "./config.mjs";
+import { sourceName } from "./sources.mjs";
 
 const LANG_NAME = { sq: "Albanian", en: "English" };
 
