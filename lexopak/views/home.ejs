@@ -1,0 +1,15 @@
+<%- include('partials/head', { title: category ? s.categories[category] : null }) %>
+<%- include('partials/header') %>
+<h1 class="section-title"><%= category ? s.categories[category] : s.latest %></h1>
+<% if (!articles.length) { %>
+  <p class="empty"><%= s.noArticles %></p>
+<% } else { %>
+  <div class="grid">
+    <% articles.forEach((a, i) => { %><%- include('partials/card', { a, lead: i === 0 && page === 1 }) %><% }) %>
+  </div>
+<% } %>
+<nav class="pager">
+  <% if (page > 1) { %><a href="?page=<%= page - 1 %>">&larr; <%= s.newer %></a><% } %>
+  <% if (hasMore) { %><a href="?page=<%= page + 1 %>"><%= s.older %> &rarr;</a><% } %>
+</nav>
+<%- include('partials/footer') %>

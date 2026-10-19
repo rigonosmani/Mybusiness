@@ -1,0 +1,13 @@
+<header class="masthead">
+  <div class="wrap masthead-top">
+    <a class="logo" href="/"><%= config.siteName.toUpperCase() %></a>
+    <span class="tagline"><%= s.tagline %></span>
+  </div>
+  <nav class="catnav" aria-label="Categories">
+    <div class="wrap catnav-inner">
+      <a href="/"><%= s.home %></a>
+      <% categories.forEach(c => { %><a href="/c/<%= c %>"><%= s.categories[c] %></a><% }) %>
+    </div>
+  </nav>
+</header>
+<main class="wrap">

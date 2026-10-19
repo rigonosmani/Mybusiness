@@ -1,0 +1,9 @@
+<article class="card<%= locals.lead ? ' card-lead' : '' %>">
+  <% if (a.image_url) { %><a href="/article/<%= a.slug %>" class="card-img"><img src="<%= a.image_url %>" alt="" loading="lazy"></a><% } %>
+  <div class="card-body">
+    <a class="kicker" href="/c/<%= a.category %>"><%= s.categories[a.category] %></a>
+    <h2><a href="/article/<%= a.slug %>"><%= a.title %></a></h2>
+    <p class="summary"><%= a.summary %></p>
+    <time datetime="<%= a.published_at %>"><%= fmtDate(a.published_at) %></time>
+  </div>
+</article>

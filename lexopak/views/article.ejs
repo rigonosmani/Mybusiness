@@ -1,0 +1,26 @@
+<%- include('partials/head', { title: article.title }) %>
+<%- include('partials/header') %>
+<article class="story">
+  <a class="kicker" href="/c/<%= article.category %>"><%= s.categories[article.category] %></a>
+  <h1><%= article.title %></h1>
+  <% if (article.summary) { %><p class="standfirst"><%= article.summary %></p><% } %>
+  <p class="byline"><%= config.siteName %> · <time datetime="<%= article.published_at %>"><%= fmtDate(article.published_at) %></time></p>
+  <% if (article.image_url) { %><img class="hero" src="<%= article.image_url %>" alt=""><% } %>
+  <div class="story-body"><%- bodyHtml %></div>
+  <% if (article.sources.length) { %>
+  <aside class="sources">
+    <h2><%= s.sources %></h2>
+    <ul><% article.sources.forEach(src => { %><li><a href="<%= src.url %>" rel="noopener nofollow" target="_blank"><%= src.name %></a></li><% }) %></ul>
+  </aside>
+  <% } %>
+  <p class="disclosure"><%= s.aiDisclosure %></p>
+</article>
+<script type="application/ld+json"><%- JSON.stringify({
+  "@context": "https://schema.org", "@type": "NewsArticle",
+  headline: article.title, description: article.summary,
+  datePublished: article.published_at, dateModified: article.updated_at,
+  image: article.image_url ? [article.image_url] : undefined,
+  publisher: { "@type": "Organization", name: config.siteName, url: config.siteUrl },
+  mainEntityOfPage: canonical
+}).replace(/</g, '\\u003c') %></script>
+<%- include('partials/footer') %>

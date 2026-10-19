@@ -1,0 +1,8 @@
+<%- include('_head', { title: 'Log in', hideNav: true }) %>
+<form method="post" action="/admin/login" class="panel login">
+  <h1>Newsroom login</h1>
+  <% if (error) { %><p class="error"><%= error %></p><% } %>
+  <label>Password <input type="password" name="password" autofocus required></label>
+  <button class="btn primary">Log in</button>
+</form>
+</main></body></html>

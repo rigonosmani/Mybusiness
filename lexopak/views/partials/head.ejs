@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="<%= config.lang %>">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><%= typeof title !== 'undefined' && title ? title + ' | ' + config.siteName : config.siteName + ' - ' + s.tagline %></title>
+<meta name="description" content="<%= meta.description || s.tagline %>">
+<link rel="canonical" href="<%= canonical %>">
+<meta property="og:site_name" content="<%= config.siteName %>">
+<meta property="og:type" content="<%= meta.type || 'website' %>">
+<meta property="og:title" content="<%= typeof title !== 'undefined' && title ? title : config.siteName %>">
+<meta property="og:description" content="<%= meta.description || s.tagline %>">
+<meta property="og:url" content="<%= canonical %>">
+<% if (meta.image) { %><meta property="og:image" content="<%= meta.image %>"><% } %>
+<meta name="twitter:card" content="summary_large_image">
+<link rel="alternate" type="application/rss+xml" title="<%= config.siteName %>" href="/feed.xml">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>

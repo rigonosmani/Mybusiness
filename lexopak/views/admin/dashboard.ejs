@@ -1,0 +1,86 @@
+<%- include('_head', { title: 'Dashboard' }) %>
+<% if (notice) { %><p class="notice"><%= notice %></p><% } %>
+
+<section class="panel">
+  <div class="panel-head">
+    <h2>Sources</h2>
+    <form method="post" action="/admin/poll" class="inline"><button class="btn">Check now</button></form>
+  </div>
+  <ul class="source-list">
+    <% sources.forEach(src => { %>
+      <li>
+        <span class="dot <%= src.status.ok === true ? 'ok' : src.status.ok === false ? 'bad' : '' %>"></span>
+        <strong><%= src.name %></strong> <a href="<%= src.homepage %>" target="_blank" rel="noopener">site</a>
+        <span class="muted"><%= src.status.message %><%= src.status.at ? ' · ' + fmtDate(src.status.at) : '' %></span>
+      </li>
+    <% }) %>
+  </ul>
+  <p class="muted">Checked every <%= config.pollMinutes %> min · auto-draft <%= config.autoDraft ? 'on' : 'off' %> · AI <%= busy ? 'working' : 'idle' %><%= queued ? ', ' + queued + ' queued' : '' %></p>
+</section>
+
+<section class="panel">
+  <h2>Add a tip</h2>
+  <form method="post" action="/admin/tips" class="tip-form">
+    <input name="url" type="url" placeholder="Link to the story (any outlet, statement, document)" required>
+    <input name="title" placeholder="Headline (optional)">
+    <textarea name="note" rows="2" placeholder="Notes for the AI: angle, extra facts, who to quote (optional)"></textarea>
+    <label class="check"><input type="checkbox" name="draftNow" value="1" checked> Draft with AI now</label>
+    <button class="btn primary">Add tip</button>
+  </form>
+</section>
+
+<section class="panel">
+  <h2>Drafts waiting for review (<%= drafts.length %>)</h2>
+  <% if (!drafts.length) { %><p class="muted">No drafts.</p><% } %>
+  <table class="list">
+    <% drafts.forEach(a => { %>
+      <tr>
+        <td><a href="/admin/articles/<%= a.id %>"><%= a.title %></a>
+          <% if (a.single_source) { %><span class="tag warn">single source</span><% } %></td>
+        <td class="muted nowrap"><%= s.categories[a.category] %> · <%= fmtDate(a.updated_at) %></td>
+      </tr>
+    <% }) %>
+  </table>
+</section>
+
+<section class="panel">
+  <h2>Leads from sources</h2>
+  <nav class="tabs">
+    <% ['new','drafting','failed','drafted','dismissed'].forEach(st => { %>
+      <a href="/admin?status=<%= st %>" class="<%= st === status ? 'active' : '' %>"><%= st %> (<%= counts[st] || 0 %>)</a>
+    <% }) %>
+  </nav>
+  <% if (!leads.length) { %><p class="muted">Nothing here.</p><% } %>
+  <table class="list">
+    <% leads.forEach(l => { %>
+      <tr>
+        <td>
+          <a href="<%= l.url %>" target="_blank" rel="noopener"><%= l.title %></a>
+          <div class="muted small"><%= sourceName(l.source) %> · <%= fmtDate(l.published_at || l.fetched_at) %></div>
+          <% if (l.excerpt) { %><div class="small"><%= truncate(l.excerpt, 200) %></div><% } %>
+          <% if (l.error) { %><div class="error small"><%= l.error %></div><% } %>
+        </td>
+        <td class="actions nowrap">
+          <% if (l.status === 'new' || l.status === 'failed' || l.status === 'dismissed') { %>
+            <form method="post" action="/admin/leads/<%= l.id %>/draft" class="inline"><button class="btn primary small">Draft with AI</button></form>
+          <% } %>
+          <% if (l.status === 'new' || l.status === 'failed') { %>
+            <form method="post" action="/admin/leads/<%= l.id %>/dismiss" class="inline"><button class="btn small">Dismiss</button></form>
+          <% } %>
+          <% if (l.article_id) { %><a class="btn small" href="/admin/articles/<%= l.article_id %>">Open draft</a><% } %>
+        </td>
+      </tr>
+    <% }) %>
+  </table>
+</section>
+
+<section class="panel">
+  <h2>Recently published</h2>
+  <table class="list">
+    <% published.forEach(a => { %>
+      <tr><td><a href="/admin/articles/<%= a.id %>"><%= a.title %></a></td>
+      <td class="muted nowrap"><%= fmtDate(a.published_at) %> · <a href="/article/<%= a.slug %>" target="_blank">view</a></td></tr>
+    <% }) %>
+  </table>
+</section>
+</main></body></html>

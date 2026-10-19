@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title><%= title %> | <%= config.siteName %> newsroom</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body class="admin">
+<header class="admin-bar">
+  <div class="wrap admin-bar-inner">
+    <a class="logo small" href="/admin"><%= config.siteName.toUpperCase() %> <span>newsroom</span></a>
+    <% if (!locals.hideNav) { %>
+    <nav>
+      <a href="/admin">Dashboard</a>
+      <a href="/admin/articles/new">Write article</a>
+      <a href="/" target="_blank">View site</a>
+      <form method="post" action="/admin/logout" class="inline"><button class="link">Log out</button></form>
+    </nav>
+    <% } %>
+  </div>
+</header>
+<main class="wrap admin-main">

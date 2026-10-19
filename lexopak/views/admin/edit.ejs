@@ -1,0 +1,49 @@
+<%- include('_head', { title: article ? 'Edit article' : 'Write article' }) %>
+<% const a = article || { title: '', summary: '', body_md: '', category: 'news', sources: [], image_url: '', editor_notes: '', status: 'draft' }; %>
+<% if (error) { %><p class="error"><%= error %></p><% } %>
+<div class="edit-layout">
+<form method="post" action="<%= article ? '/admin/articles/' + article.id : '/admin/articles/new' %>" class="panel editor">
+  <div class="panel-head">
+    <h1><%= article ? (a.status === 'published' ? 'Published article' : 'Draft') : 'New article' %></h1>
+    <% if (article && a.status === 'published') { %><a href="/article/<%= a.slug %>" target="_blank">View live &rarr;</a><% } %>
+  </div>
+  <label>Headline <input name="title" value="<%= a.title %>" required maxlength="200"></label>
+  <label>Summary <textarea name="summary" rows="2"><%= a.summary %></textarea></label>
+  <label>Category
+    <select name="category"><% categories.forEach(c => { %><option value="<%= c %>" <%= c === a.category ? 'selected' : '' %>><%= s.categories[c] %></option><% }) %></select>
+  </label>
+  <label>Body (Markdown) <textarea name="body_md" rows="22" required><%= a.body_md %></textarea></label>
+  <label>Sources, one per line: <code>Name | https://link</code>
+    <textarea name="sources" rows="4"><%= a.sources.map(x => x.name + ' | ' + x.url).join('\n') %></textarea></label>
+  <label>Image URL (only images you own or have a licence for) <input name="image_url" type="url" value="<%= a.image_url %>"></label>
+  <label>Editor notes (private) <textarea name="editor_notes" rows="3"><%= a.editor_notes %></textarea></label>
+  <div class="buttons">
+    <% if (!article) { %>
+      <button class="btn primary">Save draft</button>
+    <% } else { %>
+      <button class="btn" name="action" value="save">Save</button>
+      <% if (a.status === 'draft') { %><button class="btn primary" name="action" value="publish">Publish</button><% } %>
+      <% if (a.status === 'published') { %><button class="btn" name="action" value="unpublish">Unpublish</button><% } %>
+      <button class="btn danger" name="action" value="delete" onclick="return confirm('Delete this article?')">Delete</button>
+    <% } %>
+  </div>
+</form>
+<% if (article) { %>
+<aside class="panel review">
+  <h2>Before you publish</h2>
+  <% if (a.single_source) { %><p class="tag warn">Only one source found - confirm the facts independently.</p><% } %>
+  <% if (a.editor_notes) { %><h3>Notes from the AI</h3><p class="prewrap"><%= a.editor_notes %></p><% } %>
+  <ul class="checklist">
+    <li>Facts, names and numbers match the sources</li>
+    <li>No sentences copied from the original story</li>
+    <li>Quotes are real and attributed</li>
+    <li>Outlet that broke the story is credited</li>
+  </ul>
+  <% if (lead) { %>
+    <h3>Original tip</h3>
+    <p><a href="<%= lead.url %>" target="_blank" rel="noopener"><%= lead.title %></a><br><span class="muted small"><%= sourceName(lead.source) %></span></p>
+  <% } %>
+</aside>
+<% } %>
+</div>
+</main></body></html>
