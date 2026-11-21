@@ -34,7 +34,7 @@ function PlayersContent() {
   const [filter, setFilter] = useState("");
   const q = useQuery({ queryKey: ["my-players"], queryFn: () => rpc<PlayerRow[]>("list_my_players") });
   useEffect(() => { if (params.get("create")) setDlg({ kind: "create" }); }, [params]);
-  const refresh = () => { qc.invalidateQueries({ queryKey: ["my-players"] }); qc.invalidateQueries({ queryKey: ["admin-overview"] }); };
+  const refresh = () => { qc.invalidateQueries({ queryKey: ["my-players"] }); qc.invalidateQueries({ queryKey: ["admin-overview"] }); qc.invalidateQueries({ queryKey: ["balance"] }); qc.invalidateQueries({ queryKey: ["ledger"] }); };
   const close = () => setDlg(null);
 
   const create = useAction((v: { username: string; display_name: string; password: string }) => edge("admin-users", { action: "create_player", ...v }),

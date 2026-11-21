@@ -30,7 +30,7 @@ export default function AdminsPage() {
   const [dlg, setDlg] = useState<Dlg>(null);
   const q = useQuery({ queryKey: ["admins"], queryFn: () => rpc<AdminRow[]>("list_admins") });
   const close = () => setDlg(null);
-  const refresh = () => { qc.invalidateQueries({ queryKey: ["admins"] }); qc.invalidateQueries({ queryKey: ["super-overview"] }); };
+  const refresh = () => { qc.invalidateQueries({ queryKey: ["admins"] }); qc.invalidateQueries({ queryKey: ["super-overview"] }); qc.invalidateQueries({ queryKey: ["balance"] }); qc.invalidateQueries({ queryKey: ["ledger"] }); };
 
   const create = useAction((v: { username: string; display_name: string; password: string }) => edge("admin-users", { action: "create_admin", ...v }),
     { success: t.profile.saved, onSuccess: () => { close(); refresh(); } });
