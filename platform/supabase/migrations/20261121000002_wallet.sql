@@ -109,8 +109,10 @@ create trigger wallet_adjustments_immutable before update or delete on public.wa
   for each row execute function app.forbid_mutation();
 
 -- Each transaction must balance to zero (checked at commit).
+-- SECURITY DEFINER: the check must see every leg, not only the legs the
+-- calling user is allowed to read under RLS.
 create or replace function app.check_tx_balanced() returns trigger
-language plpgsql as $$
+language plpgsql security definer set search_path = public as $$
 declare
   v_sum bigint;
 begin
