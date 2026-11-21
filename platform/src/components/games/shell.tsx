@@ -12,7 +12,7 @@ import { fetchGames } from "@/lib/casino";
 import { formatCredits, parseCredits, unitsToInput } from "@/lib/money";
 import { cn } from "@/lib/utils";
 
-export function GameShell({ gameId, controls, stage, footer }: { gameId: string; controls: ReactNode; stage: ReactNode; footer?: ReactNode }) {
+export function GameShell({ gameId, controls, stage, footer, wide }: { gameId: string; controls: ReactNode; stage: ReactNode; footer?: ReactNode; wide?: boolean }) {
   const { t, locale } = useI18n();
   const games = useQuery({ queryKey: ["games"], queryFn: fetchGames, staleTime: 120_000 });
   const g = games.data?.find((x) => x.id === gameId);
@@ -24,11 +24,11 @@ export function GameShell({ gameId, controls, stage, footer }: { gameId: string;
           <Badge tone="primary">{t.casino.originalDemo}</Badge>
           {g?.house_edge_settings ? (
             <Badge>{t.casino.edge} {(g.house_edge_settings.edge_bps / 100).toFixed(2)}% · {t.casino.rtp} {(100 - g.house_edge_settings.edge_bps / 100).toFixed(2)}%</Badge>
-          ) : g?.fixed_edge_note ? <Badge>{t.casino.edge}: {g.fixed_edge_note}</Badge> : null}
+          ) : g?.fixed_edge_note ? <Badge>{t.casino.edge} · {t.casino.fixedEdge}: {g.fixed_edge_note}</Badge> : null}
           <Link href="/fairness" className="inline-flex items-center gap-1 text-primary hover:underline"><ShieldCheck className="size-3.5" /> {t.casino.fairnessShort}</Link>
         </div>
       </div>
-      <div className="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
+      <div className={cn("grid gap-4", wide ? "2xl:grid-cols-[320px_minmax(0,1fr)]" : "lg:grid-cols-[320px_minmax(0,1fr)]")}>
         <Card className="order-2 space-y-4 lg:order-1">{controls}</Card>
         <Card className="relative order-1 flex min-h-[380px] flex-col items-center justify-center overflow-hidden bg-panel-2 lg:order-2">{stage}</Card>
       </div>

@@ -29,14 +29,15 @@ export function SportsBrowser({ live }: { live?: boolean }) {
     refetchInterval: live ? 10_000 : 60_000,
   });
 
+  const list = fixtures.data;
   const grouped = useMemo(() => {
-    const g = new Map<string, NonNullable<typeof fixtures.data>>();
-    for (const f of fixtures.data ?? []) {
+    const g = new Map<string, NonNullable<typeof list>>();
+    for (const f of list ?? []) {
       const k = f.leagues.name;
       g.set(k, [...(g.get(k) ?? []), f]);
     }
     return [...g.entries()];
-  }, [fixtures.data]);
+  }, [list]);
 
   const sportName = (id: string, fallback: string) => t.sports.sportsNames[id] ?? fallback;
   const setParam = (k: string, v?: string) => {

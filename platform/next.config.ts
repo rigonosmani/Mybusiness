@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const supabaseHost = supabaseUrl ? new URL(supabaseUrl).host : "";
+const wsScheme = supabaseUrl.startsWith("https:") ? "wss" : "ws";
 
 // Strict security headers. Scripts only from self; network only to our Supabase project.
 const csp = [
@@ -10,7 +11,7 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
-  `connect-src 'self' ${supabaseUrl} wss://${supabaseHost}`.trim(),
+  `connect-src 'self' ${supabaseUrl} ${wsScheme}://${supabaseHost}`.trim(),
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",

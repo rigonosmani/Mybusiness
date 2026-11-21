@@ -55,7 +55,7 @@ export function RouletteGame() {
   };
 
   return (
-    <GameShell gameId="roulette"
+    <GameShell gameId="roulette" wide
       controls={<>
         <StakeInput label={r.chip} value={g.stake} onChange={g.setStake} disabled={g.busy} />
         <div className="flex justify-between text-sm"><Label className="mb-0">{r.totalBet}</Label><span className="font-bold tabular-nums">{formatCredits(total)}</span></div>

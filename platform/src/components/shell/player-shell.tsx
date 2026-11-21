@@ -73,7 +73,7 @@ export function PlayerShell({ children }: { children: ReactNode }) {
               <Link href="/casino/category/favorites" className="hidden rounded-md p-2 text-muted-foreground hover:bg-panel-3 hover:text-foreground sm:block" aria-label={t.nav.favorites}><Star className="size-5" /></Link>
               <BalancePill />
               <Notifications />
-              <LocaleSwitch persist />
+              <span className="hidden sm:block"><LocaleSwitch persist /></span>
               <UserMenu />
             </div>
           </div>

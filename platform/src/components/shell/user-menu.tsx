@@ -25,7 +25,7 @@ export function UserMenu() {
           {p.display_name.slice(0, 1).toUpperCase()}
         </span>
         <span className="hidden text-sm font-medium md:inline">{p.username}</span>
-        <ChevronDown className="size-4 text-muted-foreground" />
+        <ChevronDown className="hidden size-4 text-muted-foreground sm:block" />
       </button>
     }>
       <div className="px-2 py-1.5 text-xs text-muted-foreground">{p.display_name}</div>

@@ -24,7 +24,7 @@ export function CrashGame() {
   // Resume an in-progress round.
   useEffect(() => {
     rpc<RoundView<S> | null>("get_active_round", { p_game_id: "crash" }).then((r) => r && r.state.started_at && startLocal(r)).catch(() => {});
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   function startLocal(r: RoundView<S>, serverElapsed = 0) {
     origin.current = performance.now() - serverElapsed * 1000;

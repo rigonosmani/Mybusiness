@@ -20,7 +20,7 @@ export function useBalance(userId: string) {
       const { data } = await sb.from("wallets").select("account_id").eq("user_id", userId).single();
       if (!data || cancelled) return;
       channel = sb
-        .channel(`wallet:${data.account_id}`)
+        .channel(`wallet:${data.account_id}:${crypto.randomUUID()}`)
         .on("postgres_changes", { event: "UPDATE", schema: "public", table: "ledger_accounts", filter: `id=eq.${data.account_id}` },
           (payload) => qc.setQueryData(["balance", userId], String((payload.new as { balance: number }).balance)))
         .subscribe();
