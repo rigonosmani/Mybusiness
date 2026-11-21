@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 228 39% 7%;
+    --foreground: 220 30% 94%;
+    --panel: 227 33% 11%;
+    --panel-2: 227 30% 14%;
+    --panel-3: 226 26% 19%;
+    --border: 226 24% 21%;
+    --input: 226 24% 24%;
+    --ring: 186 90% 55%;
+    --primary: 186 90% 52%;
+    --primary-foreground: 228 45% 8%;
+    --accent: 38 96% 58%;
+    --accent-foreground: 228 45% 8%;
+    --muted: 226 26% 19%;
+    --muted-foreground: 222 16% 64%;
+    --success: 150 72% 48%;
+    --danger: 356 82% 60%;
+    --warning: 40 95% 56%;
+    color-scheme: dark;
+  }
+  * { @apply border-border; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "tnum" 1, "cv11" 1;
+    background-image:
+      radial-gradient(1200px 500px at 10% -10%, hsl(186 90% 52% / 0.07), transparent 60%),
+      radial-gradient(900px 400px at 110% 0%, hsl(262 80% 60% / 0.06), transparent 60%);
+    background-attachment: fixed;
+  }
+  ::selection { background: hsl(var(--primary) / 0.35); }
+  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+}
+
+@layer utilities {
+  .scrollbar-thin { scrollbar-width: thin; scrollbar-color: hsl(var(--panel-3)) transparent; }
+  .text-gradient { @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent; }
+  .card-shine { background-image: linear-gradient(135deg, hsl(var(--panel-2)), hsl(var(--panel)) 60%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
