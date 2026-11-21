@@ -97,5 +97,8 @@ grant execute on function
   public.svc_record_sync(text, text, text, int, int, int, text, jsonb),
   public.svc_provider_wallet(text, text, text, text, text, bigint, text),
   public.svc_security_event(uuid, text, text, jsonb),
-  public.svc_detect_suspicious_activity()
+  public.svc_detect_suspicious_activity(),
+  public.svc_rate_limit(text, int, int),
+  public.svc_last_sync(text, text),
+  public.svc_fixtures_awaiting_results(text)
 to service_role;
