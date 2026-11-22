@@ -82,7 +82,7 @@ export const sq: Dict = {
     suspended: "Pezulluar", startsAt: "Fillon", allMarkets: "Të gjitha tregjet", bookmakers: "bastore",
     stale: "Koeficientë jo të freskët",
     noLive: "Për momentin nuk po luhet asnjë ndeshje.",
-    liveLocked: "Bastet live janë të kyçura: koeficientët live duhet të përditësohen çdo disa sekonda, ndërsa plani aktual i koeficientëve rifreskohet vetëm disa herë në ditë. Rezultatet përditësohen këtu.", liveBadge: "LIVE", draw: "Barazim",
+    liveLocked: "Rezultate live. Bastet gjatë ndeshjes nuk janë aktive për momentin – vendosni bastet para fillimit te Sporte.", liveBadge: "LIVE", draw: "Barazim",
     sportsNames: { football: "Futboll", basketball: "Basketboll", tennis: "Tenis", american_football: "Futboll amerikan",
       baseball: "Bejsboll", ice_hockey: "Hokej mbi akull", volleyball: "Volejboll", handball: "Hendboll", cricket: "Kriket",
       rugby: "Ragbi", mma: "MMA", boxing: "Boks", table_tennis: "Pingpong", esports: "Esport" },

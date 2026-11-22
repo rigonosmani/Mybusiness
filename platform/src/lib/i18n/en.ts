@@ -80,7 +80,7 @@ export const en = {
     suspended: "Suspended", startsAt: "Starts", allMarkets: "All markets", bookmakers: "bookmakers",
     stale: "Odds not fresh",
     noLive: "No matches are being played right now.",
-    liveLocked: "Live betting is locked: in-play odds must be updated every few seconds, and the current odds plan refreshes only a few times a day. Scores still update here.", liveBadge: "LIVE", draw: "Draw",
+    liveLocked: "Live scores. In-play betting is not active at the moment – place your bets before kick-off under Sports.", liveBadge: "LIVE", draw: "Draw",
     sportsNames: { football: "Football", basketball: "Basketball", tennis: "Tennis", american_football: "American football",
       baseball: "Baseball", ice_hockey: "Ice hockey", volleyball: "Volleyball", handball: "Handball", cricket: "Cricket",
       rugby: "Rugby", mma: "MMA", boxing: "Boxing", table_tennis: "Table tennis", esports: "Esports" } as Record<string, string>,
