@@ -67,8 +67,14 @@ export async function runOddsSync(opts: {
     });
 
   try {
+    // "*" = every active league the provider lists (listing is free); outright-only markets are skipped.
+    let leagues = cfg.sports;
+    if (leagues.includes("*")) {
+      const listed = await opts.provider.listLeagues();
+      leagues = listed.leagues.filter((l) => l.active && !l.has_outrights).map((l) => l.key);
+    }
     const lastOdds = (await opts.rpc("svc_last_sync", { p_integration: integration, p_job: "odds" })) as Record<string, string>;
-    for (const league of cfg.sports) {
+    for (const league of leagues) {
       const last = lastOdds?.[league] ? Date.parse(lastOdds[league]) : 0;
       if (now.getTime() - last < cfg.odds_interval_minutes * 60_000) continue;
       if (!budgetOk()) {

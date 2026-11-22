@@ -117,6 +117,21 @@ describe("sync job", () => {
     expect(report.errors.filter((e) => e.startsWith("budget"))).toHaveLength(2);
   });
 
+  it('"*" syncs every active, non-outright league the provider lists', async () => {
+    const p = {
+      ...provider,
+      listLeagues: vi.fn(async () => ({ leagues: [
+        { key: "soccer_a", title: "A", group: "Soccer", active: true, has_outrights: false },
+        { key: "golf_winner", title: "G", group: "Golf", active: true, has_outrights: true },
+        { key: "soccer_off", title: "B", group: "Soccer", active: false, has_outrights: false },
+      ], quota: { remaining: null, used: null } })),
+      fetchOdds: vi.fn(async () => ({ events: [], quota: { remaining: 400, used: 1 } })),
+    };
+    const rpc = vi.fn(async (fn: string) => (fn === "svc_last_sync" ? {} : fn === "svc_fixtures_awaiting_results" ? [] : { fixtures: 0 }));
+    const report = await runOddsSync({ provider: p, rpc, config: { sports: ["*"] } });
+    expect(report.leagues_synced).toEqual(["soccer_a"]);
+  });
+
   it("reports 'skipped' when the provider is not configured", async () => {
     const p = new TheOddsApiProvider(undefined);
     const rpc = vi.fn(async (fn: string) => (fn === "svc_last_sync" ? {} : null));
