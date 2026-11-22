@@ -25,7 +25,9 @@ function LoginForm() {
     setPending(true);
     setError(null);
     const sb = supabaseBrowser();
-    const email = `${username.trim().toLowerCase()}@${process.env.NEXT_PUBLIC_AUTH_EMAIL_DOMAIN}`;
+    // Usernames map to <username>@AUTH_EMAIL_DOMAIN; a full e-mail address is used as typed.
+    const id = username.trim().toLowerCase();
+    const email = id.includes("@") ? id : `${id}@${process.env.NEXT_PUBLIC_AUTH_EMAIL_DOMAIN}`;
     const { data, error } = await sb.auth.signInWithPassword({ email, password });
     if (error || !data.user) {
       setPending(false);
@@ -54,7 +56,7 @@ function LoginForm() {
       <h1 className="text-xl font-bold">{t.auth.title}</h1>
       <p className="mb-5 text-sm text-muted-foreground">{t.auth.subtitle}</p>
       <form onSubmit={submit} className="space-y-4">
-        <Field label={t.common.username} htmlFor="u">
+        <Field label={t.auth.loginId} htmlFor="u">
           <Input id="u" autoComplete="username" required value={username} onChange={(e) => setUsername(e.target.value)} autoFocus />
         </Field>
         <Field label={t.common.password} htmlFor="p">

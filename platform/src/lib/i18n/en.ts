@@ -28,6 +28,7 @@ export const en = {
   },
   auth: {
     title: "Sign in", subtitle: "Accounts are created by your administrator.", submit: "Sign in",
+    loginId: "Username or e-mail",
     invalid: "Invalid username or password.", suspended: "This account is not active.",
     mfaTitle: "Two-factor authentication", mfaCode: "6-digit code", mfaVerify: "Verify",
     mfaEnroll: "Set up an authenticator app", mfaEnrollHint: "Scan the QR code with an authenticator app, then enter the code.",

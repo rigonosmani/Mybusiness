@@ -30,6 +30,7 @@ export const sq: Dict = {
   },
   auth: {
     title: "Hyr", subtitle: "Llogaritë krijohen nga administratori juaj.", submit: "Hyr",
+    loginId: "Emri i përdoruesit ose email-i",
     invalid: "Emër përdoruesi ose fjalëkalim i pasaktë.", suspended: "Kjo llogari nuk është aktive.",
     mfaTitle: "Verifikimi me dy faktorë", mfaCode: "Kodi me 6 shifra", mfaVerify: "Verifiko",
     mfaEnroll: "Konfiguro aplikacionin e verifikimit", mfaEnrollHint: "Skanoni kodin QR me një aplikacion verifikimi dhe vendosni kodin.",
