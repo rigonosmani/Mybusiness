@@ -121,7 +121,28 @@ function Orb({ value }: { value: number }) {
   );
 }
 
+const ART = new Set(["nova", "ringed", "rocket", "helmet", "gem_red", "gem_violet", "gem_green", "gem_blue", "gem_amber", "blackhole"]);
+
+/** AI-generated original artwork (public/games/cosmic-cascade); vector fallbacks above. */
 export function CascadeSymbol({ cell }: { cell: string }) {
+  if (cell.startsWith("orb:")) {
+    const v = Number(cell.slice(4));
+    return (
+      <div className="relative h-full w-full">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/games/cosmic-cascade/orb.webp" alt="" className="h-full w-full object-contain" draggable={false} />
+        <span className={`absolute inset-0 grid place-items-center font-black text-white [text-shadow:0_2px_6px_rgba(0,0,0,.9)] ${v >= 100 ? "text-[clamp(10px,3.2vw,20px)]" : "text-[clamp(12px,4vw,26px)]"}`}>{v}×</span>
+      </div>
+    );
+  }
+  if (ART.has(cell)) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={`/games/cosmic-cascade/${cell}.webp`} alt={cell} className={`h-full w-full object-contain ${cell === "blackhole" ? "animate-[spin_12s_linear_infinite]" : ""}`} draggable={false} />;
+  }
+  return <VectorSymbol cell={cell} />;
+}
+
+function VectorSymbol({ cell }: { cell: string }) {
   if (cell.startsWith("orb:")) return <Orb value={Number(cell.slice(4))} />;
   switch (cell) {
     case "nova": return <Nova />;

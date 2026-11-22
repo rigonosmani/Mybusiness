@@ -37,6 +37,7 @@ export function CascadeGame({ gameId }: { gameId: string }) {
   const [animating, setAnimating] = useState(false);
   const [rules, setRules] = useState(false);
   const skip = useRef(false);
+  const stageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => () => { skip.current = true; }, []);
 
@@ -44,6 +45,8 @@ export function CascadeGame({ gameId }: { gameId: string }) {
     const units = g.units();
     if (!units || animating) return;
     skip.current = false;
+    // On phones the controls sit under the reels: keep the reels in view while they spin.
+    stageRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     setBig(null); setShown(0); setFs(null); setMult(null); setWinners(new Set());
     setAnimating(true);
     const r = await g.call<S>("play_cascade", { p_game_id: gameId, p_stake: units }, { deferBalance: true });
@@ -101,7 +104,7 @@ export function CascadeGame({ gameId }: { gameId: string }) {
             : <Button className="h-12 flex-1 sm:w-48" size="lg" onClick={play} loading={g.busy} disabled={!g.stakeUnits}>{t.casino.games.slot.spin}</Button>}
         </div>
       </div>}
-      stage={<div className="relative w-full select-none p-2 sm:p-4">
+      stage={<div ref={stageRef} className="relative w-full scroll-mt-24 select-none p-2 sm:p-4">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(168,85,247,.35),transparent_55%),radial-gradient(circle_at_10%_90%,rgba(34,211,238,.25),transparent_50%)]" aria-hidden />
         <div className="relative mb-2 flex items-center justify-between px-1 text-sm">
           <span className="font-extrabold tracking-wide text-gradient">COSMIC CASCADE</span>

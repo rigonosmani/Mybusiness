@@ -23,7 +23,28 @@ const ART: Record<string, { icon: LucideIcon; from: string; to: string; motif: "
   slot_cosmic_cascade: { icon: Orbit, from: "#a855f7", to: "#0e7490", motif: "rings" },
 };
 
+/** Cover built from the game's own artwork. */
+function CascadeCover({ name, className }: { name: string; className?: string }) {
+  const img = (f: string, cls: string) => (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={`/games/cosmic-cascade/${f}.webp`} alt="" className={cn("absolute object-contain", cls)} draggable={false} />
+  );
+  return (
+    <div className={cn("relative aspect-[4/5] overflow-hidden rounded-lg bg-[radial-gradient(circle_at_50%_30%,#7c3aed,#1e1b4b_60%,#020617)]", className)}>
+      {img("blackhole", "left-1/2 top-[6%] w-[80%] -translate-x-1/2 opacity-80 animate-[spin_14s_linear_infinite]")}
+      {img("nova", "left-1/2 top-[18%] w-[46%] -translate-x-1/2 drop-shadow-[0_0_18px_rgba(250,204,21,.6)]")}
+      {img("gem_violet", "left-[4%] top-[52%] w-[34%] -rotate-12")}
+      {img("gem_green", "right-[4%] top-[54%] w-[32%] rotate-12")}
+      {img("comet", "right-[-6%] top-[2%] w-[40%]")}
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3 pt-10">
+        <p className="text-sm font-extrabold uppercase tracking-wide text-white">{name}</p>
+      </div>
+    </div>
+  );
+}
+
 export function GameArt({ id, name, className, thumbnail }: { id: string; name: string; className?: string; thumbnail?: string | null }) {
+  if (id === "slot_cosmic_cascade") return <CascadeCover name={name} className={className} />;
   if (thumbnail) {
     return (
       <div className={cn("relative aspect-[4/5] overflow-hidden rounded-lg bg-panel-3", className)}>
