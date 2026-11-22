@@ -30,6 +30,7 @@ const login = async (u, p) => {
   await page.goto(`${BASE}/login`);
   await page.fill("#u", u); await page.fill("#p", p);
   await page.click("button[type=submit]");
+  await page.waitForURL((u) => !u.pathname.startsWith("/login"));
   await page.waitForLoadState("networkidle");
 };
 const pill = async (href) => { const l = page.locator(`header a[href='${href}']`); await l.filter({ hasText: "Cr" }).waitFor(); return l.innerText(); };

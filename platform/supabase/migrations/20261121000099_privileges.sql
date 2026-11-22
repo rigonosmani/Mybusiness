@@ -80,7 +80,11 @@ grant execute on function
   public.admin_player_report(uuid),
   public.my_overview(),
   public.list_security_events(int),
-  public.report_security_event(text, jsonb)
+  public.report_security_event(text, jsonb),
+  -- provider configuration (Main Admin)
+  public.integration_secret_status(),
+  public.admin_update_provider(text, text, text, text, jsonb),
+  public.admin_import_games(text, jsonb)
 to authenticated;
 
 -- Service-role entry points (Edge Functions, scheduled jobs). Never exposed to browsers.
@@ -100,5 +104,10 @@ grant execute on function
   public.svc_detect_suspicious_activity(),
   public.svc_rate_limit(text, int, int),
   public.svc_last_sync(text, text),
-  public.svc_fixtures_awaiting_results(text)
+  public.svc_fixtures_awaiting_results(text),
+  public.svc_require_super_admin(uuid, text),
+  public.svc_set_integration_secret(uuid, text, text, text, text, text),
+  public.svc_get_integration_secret(text, text, text),
+  public.svc_launch_context(uuid),
+  public.svc_provider_balance(text, text)
 to service_role;

@@ -9,7 +9,9 @@ const csp = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline'" + (process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""),
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob:",
+  "img-src 'self' data: blob: https:",
+  // Licensed provider games open in an iframe served from the provider's own domain.
+  "frame-src 'self' https:",
   "font-src 'self' data:",
   `connect-src 'self' ${supabaseUrl} ${wsScheme}://${supabaseHost}`.trim(),
   "frame-ancestors 'none'",

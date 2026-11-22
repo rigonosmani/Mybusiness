@@ -1,7 +1,7 @@
 "use client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, PageHeader } from "@/components/ui/card";
-import { SkeletonRows, Notice } from "@/components/ui/feedback";
+import { SkeletonRows } from "@/components/ui/feedback";
 import { StatusBadge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
@@ -10,6 +10,7 @@ import { useI18n } from "@/lib/i18n";
 import { fetchGames } from "@/lib/casino";
 import { rpc } from "@/lib/rpc";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import { ProviderConfig, type ProviderRow } from "@/components/admin/provider-config";
 
 export default function GamesAdmin() {
   const { t } = useI18n();
@@ -20,7 +21,8 @@ export default function GamesAdmin() {
   return (
     <div className="space-y-6">
       <PageHeader title={t.super.games.title} />
-      <Notice>{t.casino.externalNotConfigured} {t.casino.liveNotConfigured}</Notice>
+      <h2 className="text-lg font-semibold">{t.super.games.providers}</h2>
+      {(providers.data as ProviderRow[] | undefined)?.filter((p) => p.kind !== "in_house").map((p) => <ProviderConfig key={p.id} provider={p} />)}
       <Card>
         <Table>
           <THead><tr><TH>{t.casino.provider}</TH><TH>{t.common.status}</TH><TH>Wallet</TH><TH>{t.common.note}</TH></tr></THead>

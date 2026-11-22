@@ -5,7 +5,7 @@ export interface CasinoGame {
   id: string; provider_id: string; name: string; category: string; tags: string[];
   description: Record<string, string>; rules: Record<string, string>; enabled: boolean;
   is_featured: boolean; is_new: boolean; edge_configurable: boolean; fixed_edge_note: string | null;
-  certified_rtp: number | null; min_bet: number; max_bet: number; sort_order: number;
+  certified_rtp: number | null; thumbnail: string | null; min_bet: number; max_bet: number; sort_order: number;
   casino_providers: { name: string; kind: string; status: string } | null;
   house_edge_settings: { edge_bps: number; min_bps: number; max_bps: number } | null;
 }

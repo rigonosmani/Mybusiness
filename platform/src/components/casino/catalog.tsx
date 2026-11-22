@@ -28,6 +28,8 @@ export function Catalog({ category = "all", limit, hideTabs }: { category?: stri
     .filter((g) => !q || g.name.toLowerCase().includes(q.toLowerCase()))
     .slice(0, limit), [games.data, favs.data, category, q, limit]);
 
+  const hasExternal = (cat: string) => (games.data ?? []).some((g) => g.category === cat && g.enabled && g.casino_providers?.kind !== "in_house" && g.casino_providers?.status === "active");
+
   async function toggle(id: string) {
     await rpc("toggle_favorite", { p_game_id: id });
     qc.invalidateQueries({ queryKey: ["favorites", p.id] });
@@ -51,8 +53,8 @@ export function Catalog({ category = "all", limit, hideTabs }: { category?: stri
           </div>
         </div>
       )}
-      {category === "live" && <div className="mb-4"><Notice>{t.casino.liveNotConfigured}</Notice></div>}
-      {category === "slots" && <div className="mb-4"><Notice>{t.casino.externalNotConfigured}</Notice></div>}
+      {category === "live" && !hasExternal("live") && <div className="mb-4"><Notice>{t.casino.liveNotConfigured}</Notice></div>}
+      {category === "slots" && !hasExternal("slots") && <div className="mb-4"><Notice>{t.casino.externalNotConfigured}</Notice></div>}
       {games.isLoading ? (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-6">{Array.from({ length: 8 }, (_, i) => <Skeleton key={i} className="aspect-[4/5]" />)}</div>
       ) : games.error ? <ErrorState message={errorMessage(games.error, t)} onRetry={() => games.refetch()} retryLabel={t.common.retry} /> :

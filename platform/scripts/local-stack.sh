@@ -20,7 +20,7 @@ const h=b({alg:"HS256",typ:"JWT"}),p=b({iss:"local",role:process.argv[2],exp:198
 console.log(h+"."+p+"."+c.createHmac("sha256",s).update(h+"."+p).digest("base64url"))' "$JWT_SECRET" "$1"; }
 
 if [ "${1:-up}" = "down" ]; then
-  pkill -f "$DIR/auth" || true; pkill -f "$DIR/postgrest" || true; pkill -f "$DIR/gateway.mjs" || true; pkill -f "admin-users/index.ts" || true
+  pkill -f "$DIR/auth" || true; pkill -f "$DIR/postgrest" || true; pkill -f "$DIR/gateway.mjs" || true; pkill -f "supabase/functions" || true; pkill -f "/index.ts" || true
   exit 0
 fi
 
@@ -54,9 +54,9 @@ SQL
 ( set -a
   GOTRUE_API_HOST=127.0.0.1 PORT=9999 API_EXTERNAL_URL=http://localhost:54321/auth/v1 GOTRUE_DB_DRIVER=postgres
   DATABASE_URL="postgres://supabase_auth_admin:pw@$PGHOST:5432/$DB?search_path=auth" GOTRUE_SITE_URL=http://localhost:3000
-  GOTRUE_JWT_SECRET=$JWT_SECRET GOTRUE_JWT_EXP=3600 GOTRUE_JWT_AUD=authenticated GOTRUE_JWT_ADMIN_ROLES=service_role
+  GOTRUE_JWT_SECRET=$JWT_SECRET GOTRUE_JWT_EXP=3600 GOTRUE_JWT_AUD=authenticated GOTRUE_JWT_DEFAULT_GROUP_NAME=authenticated GOTRUE_JWT_ADMIN_ROLES=service_role
   GOTRUE_DISABLE_SIGNUP=true GOTRUE_MAILER_AUTOCONFIRM=true GOTRUE_MFA_TOTP_ENROLL_ENABLED=true GOTRUE_MFA_TOTP_VERIFY_ENABLED=true
-  GOTRUE_PASSWORD_MIN_LENGTH=10 GOTRUE_LOG_LEVEL=warn
+  GOTRUE_PASSWORD_MIN_LENGTH=10 GOTRUE_LOG_LEVEL=warn GOTRUE_DB_MIGRATIONS_PATH=$DIR/migrations
   nohup "$DIR/auth" > "$DIR/auth.log" 2>&1 & )
 for i in $(seq 1 30); do curl -sf localhost:9999/health >/dev/null && break; sleep 1; done
 
@@ -76,13 +76,14 @@ nohup "$DIR/postgrest" "$DIR/postgrest.conf" > "$DIR/postgrest.log" 2>&1 &
 
 cat > "$DIR/gateway.mjs" <<'JS'
 import http from "node:http";
-const routes = [["/rest/v1", 3001], ["/auth/v1", 9999], ["/functions/v1/admin-users", 8000]];
+const routes = [["/rest/v1", 3001], ["/auth/v1", 9999], ["/functions/v1/admin-users", 8000], ["/functions/v1/admin-integrations", 8001],
+  ["/functions/v1/casino-launch", 8002], ["/functions/v1/casino-provider-callback", 8003]];
 http.createServer((req, res) => {
   const cors = { "access-control-allow-origin": "*", "access-control-allow-headers": "*", "access-control-allow-methods": "*" };
   if (req.method === "OPTIONS") { res.writeHead(204, cors); return res.end(); }
   const r = routes.find(([p]) => req.url.startsWith(p));
   if (!r) { res.writeHead(404, cors); return res.end(); }
-  const path = r[1] === 8000 ? "/" : req.url.slice(r[0].length) || "/";
+  const path = r[0].startsWith("/functions") ? "/" : req.url.slice(r[0].length) || "/";
   const p = http.request({ host: "127.0.0.1", port: r[1], path, method: req.method, headers: { ...req.headers, host: "localhost" } }, (pr) => {
     res.writeHead(pr.statusCode, { ...pr.headers, ...cors }); pr.pipe(res);
   });
@@ -93,9 +94,14 @@ JS
 nohup node "$DIR/gateway.mjs" > "$DIR/gateway.log" 2>&1 &
 
 ANON=$(jwt anon); SERVICE=$(jwt service_role)
-( cd supabase/functions && SUPABASE_URL=http://localhost:54321 SUPABASE_ANON_KEY=$ANON SUPABASE_SERVICE_ROLE_KEY=$SERVICE \
-  AUTH_EMAIL_DOMAIN=accounts.kometa.local ALLOWED_ORIGINS=http://localhost:3000 \
-  nohup deno run --allow-net --allow-env --allow-read admin-users/index.ts > "../../$DIR/edge.log" 2>&1 & )
+SECRETS_KEY=${INTEGRATION_SECRETS_KEY:-$(node -e 'console.log(require("crypto").randomBytes(32).toString("hex"))')}
+port=8000
+for fn in admin-users admin-integrations casino-launch casino-provider-callback; do
+  ( cd supabase/functions && SUPABASE_URL=http://localhost:54321 SUPABASE_ANON_KEY=$ANON SUPABASE_SERVICE_ROLE_KEY=$SERVICE \
+    AUTH_EMAIL_DOMAIN=accounts.kometa.local ALLOWED_ORIGINS=http://localhost:3000 INTEGRATION_SECRETS_KEY=$SECRETS_KEY \
+    DENO_SERVE_ADDRESS=tcp:127.0.0.1:$port nohup deno run ${DENO_EXTRA_FLAGS:-} --allow-net --allow-env --allow-read $fn/index.ts > "../../$DIR/$fn.log" 2>&1 & )
+  port=$((port + 1))
+done
 
 cat > .env.local <<ENV
 NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321

@@ -43,5 +43,5 @@ jobs:
         run: npm test
       - name: Type-check Edge Functions
         working-directory: platform/supabase/functions
-        run: deno check admin-users/index.ts odds-sync/index.ts casino-provider-callback/index.ts maintenance/index.ts
+        run: deno check admin-users/index.ts admin-integrations/index.ts odds-sync/index.ts casino-launch/index.ts casino-provider-callback/index.ts maintenance/index.ts
       - run: npm run build

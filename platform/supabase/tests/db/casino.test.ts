@@ -299,3 +299,49 @@ describe("licensed provider wallet callbacks", () => {
     await db.sql(`update casino_providers set status = 'not_configured' where id = 'licensed_aggregator'`);
   });
 });
+
+describe("provider configuration from the admin panel", () => {
+  const KEY = "k".repeat(40);
+  it("only the Main Admin can store secrets; values are encrypted and never readable by users", async () => {
+    await expectError(db.service(`select svc_set_integration_secret($1, 'aal1', 'the_odds_api', 'api_key', 'abc12345', $2)`, [adminA, KEY]), "FORBIDDEN");
+    await expectError(db.service(`select svc_set_integration_secret($1, 'aal1', 'the_odds_api', 'api_key', 'abc12345', 'short')`, [owner]), "SECRETS_KEY_NOT_CONFIGURED");
+    const [r] = await db.service(`select svc_set_integration_secret($1, 'aal1', 'the_odds_api', 'api_key', 'my-odds-key-9876', $2) r`, [owner, KEY]);
+    expect(r.r).toEqual({ configured: true, last4: "9876" });
+    const [raw] = await db.sql(`select convert_from(ciphertext, 'latin1') c from app.integration_secrets where integration_id = 'the_odds_api'`);
+    expect(raw.c).not.toContain("my-odds-key");
+    const [dec] = await db.service(`select svc_get_integration_secret('the_odds_api', 'api_key', $1) v`, [KEY]);
+    expect(dec.v).toBe("my-odds-key-9876");
+    await expectError(db.user(owner, `select svc_get_integration_secret('the_odds_api', 'api_key', $1)`, [KEY]), /permission denied/);
+    const [st] = await db.user(owner, `select integration_secret_status() s`);
+    expect(JSON.stringify(st.s)).not.toContain("my-odds-key");
+    await expectError(db.user(adminA, `select integration_secret_status()`), "FORBIDDEN");
+    const audit = await db.sql(`select details::text d from audit_logs where action = 'integration.secret_set'`);
+    expect(audit.every((a) => !a.d.includes("my-odds-key"))).toBe(true);
+  });
+
+  it("an aggregator can only be activated once URL and secrets are configured", async () => {
+    await expectError(db.user(owner, `select admin_update_provider('licensed_aggregator', 'active', 'https://api.aggregator.example', null, '{"operator_id":"op1"}')`), "PROVIDER_INCOMPLETE");
+    await expectError(db.user(owner, `select admin_update_provider('licensed_aggregator', 'disabled', null, null, '{"api_key":"x"}')`), "SECRETS_NOT_ALLOWED");
+    await expectError(db.user(owner, `select admin_update_provider('licensed_aggregator', 'disabled', 'http://insecure.example', null, null)`), "INVALID_URL");
+    await db.service(`select svc_set_integration_secret($1, 'aal1', 'licensed_aggregator', 'api_key', 'agg-key-1111', $2)`, [owner, KEY]);
+    await db.service(`select svc_set_integration_secret($1, 'aal1', 'licensed_aggregator', 'callback_secret', 'cb-secret-2222', $2)`, [owner, KEY]);
+    await db.user(owner, `select admin_update_provider('licensed_aggregator', 'active', 'https://api.aggregator.example', 'LIC-1', '{"operator_id":"op1"}')`);
+    await expectError(db.user(adminA, `select admin_update_provider('licensed_aggregator', 'disabled', null, null, null)`), "FORBIDDEN");
+  });
+
+  it("imports the provider catalogue and launches a session with wallet context", async () => {
+    const [r] = await db.user(owner, `select admin_import_games('licensed_aggregator', $1::jsonb) r`, [JSON.stringify([
+      { external_game_id: "vs20demo", name: "Demo Title", category: "slots", thumbnail: "https://cdn.example/x.png", rtp: 96.5 },
+      { external_game_id: "live-bj-1", name: "Live Table", category: "live" },
+    ])]);
+    expect(r.r.imported).toBe(2);
+    await expectError(db.user(owner, `select admin_import_games('licensed_aggregator', '[{"external_game_id":"a","name":"b","thumbnail":"http://x"}]'::jsonb)`), "INVALID_URL");
+    const s = await play(`casino_create_session('licensed_aggregator_vs20demo')`);
+    const [ctx] = await db.service(`select svc_launch_context($1) c`, [s.session_id]);
+    expect(ctx.c.external_game_id).toBe("vs20demo");
+    expect(ctx.c.api_base_url).toBe("https://api.aggregator.example");
+    const [bal] = await db.service(`select svc_provider_balance('licensed_aggregator', $1) b`, [s.launch_token]);
+    expect(BigInt(bal.b.balance)).toBe(await db.balance(p1));
+    await db.sql(`update casino_providers set status = 'not_configured' where id = 'licensed_aggregator'`);
+  });
+});

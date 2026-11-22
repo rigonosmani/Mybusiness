@@ -54,3 +54,9 @@ verify_jwt = false   # protected by x-cron-secret
 
 [functions.casino-provider-callback]
 verify_jwt = false   # protected by HMAC signature + timestamp
+
+[functions.admin-integrations]
+verify_jwt = true
+
+[functions.casino-launch]
+verify_jwt = true

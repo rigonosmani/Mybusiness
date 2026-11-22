@@ -12,8 +12,9 @@ Do **not** add the service-role key to Vercel. Set Supabase Auth *Site URL* and
 ```bash
 supabase link --project-ref <ref>
 supabase db push
-supabase functions deploy admin-users odds-sync casino-provider-callback maintenance
-supabase secrets set AUTH_EMAIL_DOMAIN=... ALLOWED_ORIGINS=https://app.example CRON_SECRET=... ODDS_API_KEY=...
+supabase functions deploy admin-users admin-integrations odds-sync casino-launch casino-provider-callback maintenance
+supabase secrets set AUTH_EMAIL_DOMAIN=... ALLOWED_ORIGINS=https://app.example CRON_SECRET=... \
+  INTEGRATION_SECRETS_KEY=$(openssl rand -hex 32)   # encrypts API keys entered in the admin panel
 ```
 
 Enable Realtime for the database (tables are added to `supabase_realtime` by the migrations).

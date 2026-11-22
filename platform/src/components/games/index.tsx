@@ -16,6 +16,7 @@ import { PlinkoGame } from "./plinko";
 import { RouletteGame } from "./roulette";
 import { SlotGame } from "./slot";
 import { VideoPokerGame } from "./videopoker";
+import { ExternalGame } from "./external";
 
 export function GamePlayer({ id }: { id: string }) {
   const { t } = useI18n();
@@ -23,6 +24,7 @@ export function GamePlayer({ id }: { id: string }) {
   if (games.isLoading) return <Skeleton className="h-[480px] w-full" />;
   const g = games.data?.find((x) => x.id === id);
   if (!g || !g.enabled || g.casino_providers?.status !== "active") return <EmptyState title={t.casino.unavailable} />;
+  if (g.casino_providers?.kind !== "in_house") return <ExternalGame game={g} />;
   const edge = g.house_edge_settings?.edge_bps ?? 0;
   switch (id) {
     case "dice": return <DiceGame edgeBps={edge} />;

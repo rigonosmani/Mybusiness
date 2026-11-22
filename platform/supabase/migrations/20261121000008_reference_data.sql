@@ -32,9 +32,9 @@ on conflict (code) do nothing;
 insert into public.casino_providers (id, name, kind, status, wallet_mode, notes) values
   ('kometa_originals', 'Kometa Originals', 'in_house', 'active', 'internal',
    'Original games built for this platform. Outcomes computed server-side, provably fair.'),
-  ('licensed_aggregator', 'Licensed slot aggregator (not configured)', 'aggregator', 'not_configured', 'seamless_callback',
+  ('licensed_aggregator', 'Licensed slot aggregator', 'aggregator', 'not_configured', 'seamless_callback',
    'Integration interface only. Commercial slot content requires a contract and licence with an aggregator.'),
-  ('licensed_live_studio', 'Live casino studio (not configured)', 'live_studio', 'not_configured', 'seamless_callback',
+  ('licensed_live_studio', 'Live casino studio', 'live_studio', 'not_configured', 'seamless_callback',
    'Integration interface only. Live dealer content is never freely available and requires a licensed studio.')
 on conflict (id) do nothing;
 

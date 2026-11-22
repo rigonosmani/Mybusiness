@@ -43,14 +43,15 @@ platform/
    ```
 3. Deploy Edge Functions and set their secrets:
    ```bash
-   supabase functions deploy admin-users odds-sync casino-provider-callback maintenance
+   supabase functions deploy admin-users admin-integrations odds-sync casino-launch casino-provider-callback maintenance
    supabase secrets set AUTH_EMAIL_DOMAIN=accounts.kometa.local ALLOWED_ORIGINS=https://your-domain \
-                        CRON_SECRET=$(openssl rand -hex 32) ODDS_API_KEY=<optional>
+                        CRON_SECRET=$(openssl rand -hex 32) INTEGRATION_SECRETS_KEY=$(openssl rand -hex 32)
    ```
 4. Configure the app: `cp .env.example .env.local` and fill in URL, anon key, service-role key (used **only** by the bootstrap script on your machine).
 5. Create the Main Administrator: `npm install && npm run bootstrap` (set `BOOTSTRAP_DEMO_ACCOUNTS=true` to also create `admin_a`, `admin_b`, `player_a1`, `player_b1`).
 6. Run: `npm run dev` → http://localhost:3000. Sign in with a **username** (it maps to `<username>@AUTH_EMAIL_DOMAIN` internally).
-7. Schedule `odds-sync` and `maintenance` (see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md#scheduled-jobs)) and enable The Odds API under **Main admin → Integrations**.
+7. Schedule `odds-sync` and `maintenance` (see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md#scheduled-jobs)). In **Main admin → Integrations** enter The Odds API key, enable it and press *Sync now*.
+8. Licensed casino content (after you have a contract): **Main admin → Games** — enter the aggregator URL, keys, import its catalogue, activate. See [docs/CASINO_PROVIDERS.md](docs/CASINO_PROVIDERS.md).
 
 Local development with Docker: `supabase start`, then use the printed URL/keys in `.env.local`.
 
@@ -60,7 +61,7 @@ Local development with Docker: `supabase start`, then use the printed URL/keys i
 |---|---|
 | `npm test` | unit (money, provider normalisation, sync budget, signatures) + database suites. Needs PostgreSQL ≥ 15 at `TEST_DATABASE_URL` (default `postgres://postgres:postgres@localhost:5432/postgres`); each suite runs the real migrations in a throw-away database. |
 | `npm run typecheck`, `npx eslint src` | static checks |
-| `npm run stack:up` → `npm run build && npm start` → `npm run e2e` | Docker-free local stack (GoTrue + PostgREST + Deno Edge Function) and a Playwright run through the real UI |
+| `npm run stack:up` → `npm run build && npm start` → `npm run e2e`, then `node e2e/mock-aggregator.mjs` + `node e2e/provider.mjs` (start the stack with `DENO_EXTRA_FLAGS=--unsafely-ignore-certificate-errors=localhost` for the self-signed mock) | Docker-free local stack (GoTrue + PostgREST + Deno Edge Function) and a Playwright run through the real UI |
 
 The mandatory scenarios A–F map to `supabase/tests/db/hierarchy-wallet.test.ts` (A, B, C, F),
 `sportsbook.test.ts` (D, F), `casino.test.ts` (E, F) and `security.test.ts`; `e2e/smoke.mjs`

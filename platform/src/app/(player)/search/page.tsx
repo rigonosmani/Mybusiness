@@ -34,7 +34,7 @@ function SearchContent() {
       {q && gameHits.length === 0 && (fixtures.data?.length ?? 0) === 0 && !fixtures.isLoading && <EmptyState title={t.common.empty} />}
       {gameHits.length > 0 && (
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-5">
-          {gameHits.map((g) => <Link key={g.id} href={`/casino/play/${g.id}`}><GameArt id={g.id} name={g.name} /></Link>)}
+          {gameHits.map((g) => <Link key={g.id} href={`/casino/play/${g.id}`}><GameArt id={g.id} name={g.name} thumbnail={g.thumbnail} /></Link>)}
         </div>
       )}
       {fr.data && <div className="space-y-2">{fixtures.data?.map((f) => <FixtureRow key={f.id} fixture={f} freshness={fr.data!} />)}</div>}

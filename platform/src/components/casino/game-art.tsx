@@ -22,7 +22,16 @@ const ART: Record<string, { icon: LucideIcon; from: string; to: string; motif: "
   slot_astro_gems: { icon: Gem, from: "#60a5fa", to: "#312e81", motif: "dots" },
 };
 
-export function GameArt({ id, name, className }: { id: string; name: string; className?: string }) {
+export function GameArt({ id, name, className, thumbnail }: { id: string; name: string; className?: string; thumbnail?: string | null }) {
+  if (thumbnail) {
+    return (
+      <div className={cn("relative aspect-[4/5] overflow-hidden rounded-lg bg-panel-3", className)}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={thumbnail} alt={name} loading="lazy" className="h-full w-full object-cover" />
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3 pt-8"><p className="text-sm font-extrabold uppercase tracking-wide text-white">{name}</p></div>
+      </div>
+    );
+  }
   const a = ART[id] ?? { icon: Target, from: "#64748b", to: "#1e293b", motif: "dots" as const };
   const Icon = a.icon;
   return (

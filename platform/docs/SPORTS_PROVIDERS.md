@@ -17,6 +17,9 @@ Facts checked on 2026-11-21 at the-odds-api.com (re-check before going live):
 | Freshness | featured markets update every 60 s pre-match, 40 s in-play; live scores ≈ every 30 s; results up to 3 days back |
 | Terms | display in apps (incl. commercial) allowed; resale/redistribution of the data as a standalone product prohibited; attribution appreciated, not required; keep the key private |
 
+The API key can be entered in **Main admin → Integrations** (encrypted, write-only) or set as
+the `ODDS_API_KEY` Edge secret; **Sync now** runs a sync immediately.
+
 What the adapter does (`_shared/sports/the-odds-api.ts`): fetches `/odds` per configured
 league with `oddsFormat=decimal`, takes the **median** price per outcome across returned
 bookmakers (separately per totals/spread line), drops one-sided markets, and maps

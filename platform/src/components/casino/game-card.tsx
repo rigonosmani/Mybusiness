@@ -13,9 +13,9 @@ export function GameCard({ game, favorite, onToggleFavorite }: { game: CasinoGam
   return (
     <div className={cn("group relative transition", playable ? "hover:-translate-y-1" : "opacity-50")}>
       {playable ? (
-        <Link href={`/casino/play/${game.id}`} aria-label={`${t.casino.play} ${game.name}`}><GameArt id={game.id} name={game.name} /></Link>
+        <Link href={`/casino/play/${game.id}`} aria-label={`${t.casino.play} ${game.name}`}><GameArt id={game.id} name={game.name} thumbnail={game.thumbnail} /></Link>
       ) : (
-        <div aria-disabled><GameArt id={game.id} name={game.name} /></div>
+        <div aria-disabled><GameArt id={game.id} name={game.name} thumbnail={game.thumbnail} /></div>
       )}
       <button onClick={onToggleFavorite} aria-pressed={favorite} aria-label={t.nav.favorites}
         className="absolute right-2 top-2 rounded-full bg-black/40 p-1.5 text-white backdrop-blur hover:bg-black/60">

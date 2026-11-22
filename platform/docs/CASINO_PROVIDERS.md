@@ -10,7 +10,34 @@ this platform is an **original demo implementation** (14 games, see [GAMES.md](G
 The *Live casino* category is intentionally empty and explains why; the provider rows
 `licensed_aggregator` and `licensed_live_studio` are `not_configured`.
 
-## Integration architecture (ready, disabled)
+## Connecting a provider from the admin panel
+
+Everything is configured by the Main Administrator — no code changes:
+
+1. Edge Function secret (once): `supabase secrets set INTEGRATION_SECRETS_KEY=$(openssl rand -hex 32)`.
+2. **Main admin → Games → Licensed slot aggregator**:
+   - *API base URL* (https), *Licence reference*, settings JSON
+     (`operator_id`, `launch_path` default `/games/launch`, `launch_url_field`, `currency`, `extra`);
+   - *API key* and *Callback secret* — write-only fields, encrypted in the database
+     (pgp_sym_encrypt with `INTEGRATION_SECRETS_KEY`), only the last 4 characters are ever shown;
+   - give the provider the displayed *Wallet callback URL*;
+   - *Import games*: paste the provider's catalogue as JSON
+     `[{"external_game_id","name","category","thumbnail","rtp"}]`;
+   - set status **active** (refused until URL, API key and callback secret exist).
+3. Players see the games in the catalogue; `casino-launch` asks the provider for a game URL
+   (signed server-to-server request) and the game opens in an iframe. Every spin moves
+   Kometa credits through `casino-provider-callback` (`balance`, `debit`, `credit`, `rollback`).
+
+**Generic protocol.** `supabase/functions/_shared/casino/generic-aggregator.ts` implements the
+common seamless-wallet shape (launch: `POST {base}{launch_path}` with `x-timestamp`,
+`x-signature = HMAC-SHA256(api_key, "<ts>.<body>")`; callbacks signed with the callback secret).
+Field names are configurable; a vendor whose API differs more needs a small adapter file
+next to it — the wallet, sessions, rounds and admin screens stay the same.
+
+**Local test:** `e2e/mock-aggregator.mjs` is a fake provider that follows this protocol;
+`e2e/provider.mjs` drives the whole flow through the UI.
+
+## Integration architecture
 
 | Step | Where |
 |---|---|
