@@ -98,7 +98,9 @@ describe("stateful games", () => {
     for (let i = 0; i < 30 && h.status === "active"; i++) {
       const cards = h.state.cards;
       const rank = (cards[cards.length - 1] % 13) + 1;
-      h = await play(`hilo_guess($1, $2)`, [h.round_id, rank <= 7 ? "higher" : "lower"]);
+      // "higher" on an Ace and "lower" on a King cannot lose, so the game refuses them.
+      const guess = rank === 1 ? "lower" : rank === 13 ? "higher" : rank <= 7 ? "higher" : "lower";
+      h = await play(`hilo_guess($1, $2)`, [h.round_id, guess]);
       if (h.status === "active" && i >= 1) h = await play(`hilo_cashout($1)`, [h.round_id]);
     }
     expect(h.status).not.toBe("active");
@@ -307,8 +309,8 @@ describe("provider configuration from the admin panel", () => {
     await expectError(db.service(`select svc_set_integration_secret($1, 'aal1', 'the_odds_api', 'api_key', 'abc12345', 'short')`, [owner]), "SECRETS_KEY_NOT_CONFIGURED");
     const [r] = await db.service(`select svc_set_integration_secret($1, 'aal1', 'the_odds_api', 'api_key', 'my-odds-key-9876', $2) r`, [owner, KEY]);
     expect(r.r).toEqual({ configured: true, last4: "9876" });
-    const [raw] = await db.sql(`select convert_from(ciphertext, 'latin1') c from app.integration_secrets where integration_id = 'the_odds_api'`);
-    expect(raw.c).not.toContain("my-odds-key");
+    const [raw] = await db.sql(`select position(convert_to('my-odds-key', 'UTF8') in ciphertext) p from app.integration_secrets where integration_id = 'the_odds_api'`);
+    expect(raw.p).toBe(0); // plaintext never appears in the stored bytes
     const [dec] = await db.service(`select svc_get_integration_secret('the_odds_api', 'api_key', $1) v`, [KEY]);
     expect(dec.v).toBe("my-odds-key-9876");
     await expectError(db.user(owner, `select svc_get_integration_secret('the_odds_api', 'api_key', $1)`, [KEY]), /permission denied/);
@@ -343,5 +345,45 @@ describe("provider configuration from the admin panel", () => {
     const [bal] = await db.service(`select svc_provider_balance('licensed_aggregator', $1) b`, [s.launch_token]);
     expect(BigInt(bal.b.balance)).toBe(await db.balance(p1));
     await db.sql(`update casino_providers set status = 'not_configured' where id = 'licensed_aggregator'`);
+  });
+});
+
+describe("Cosmic Cascade (tumble slot)", () => {
+  it("plays a round server-side and pays stake × scaled raw win", async () => {
+    let feature = false;
+    for (let i = 0; i < 12; i++) {
+      const before = await db.balance(p1);
+      const r = await play(`play_cascade('slot_cosmic_cascade', 100, null)`);
+      expect(["won", "lost", "push"]).toContain(r.status);
+      const expected = Math.min(5000, Number(r.state.raw) * Number(r.state.scale));
+      expect(Number(r.multiplier)).toBeCloseTo(Math.floor(expected * 10000) / 10000, 4);
+      expect(await db.balance(p1)).toBe(before - 100n + BigInt(r.payout));
+      expect(r.state.spins[0].final).toHaveLength(30);
+      if (r.state.free_spins > 0) feature = true;
+    }
+    void feature;
+  });
+
+  it("matches the TypeScript engine exactly (provably fair)", async () => {
+    const { playRound, COSMIC_CASCADE } = await import("../../../src/lib/slots/cascade");
+    const [cfgRow] = await db.sql(`select config from game_configurations where game_id = 'slot_cosmic_cascade'`);
+    for (let nonce = 0; nonce < 60; nonce++) {
+      const [row] = await db.sql(`select (app.cascade_spin($1::jsonb, $2, 'srv-seed', 'cli-seed', $3, 0)).*`, [JSON.stringify(cfgRow.config), nonce % 3 === 0, nonce]);
+      const fs = await floats({ serverSeed: "srv-seed", clientSeed: "cli-seed", nonce }, 4000);
+      let i = 0;
+      const next = () => fs[i++];
+      const { spin } = await import("../../../src/lib/slots/cascade");
+      const ts = spin(COSMIC_CASCADE, nonce % 3 === 0, next);
+      const enc = (g: { s: string; v?: number }[]) => g.map((c) => (c.s === "orb" ? `orb:${c.v}` : c.s));
+      expect(row.o_spin.final).toEqual(enc(ts.final));
+      expect(row.o_spin.steps.length).toBe(ts.steps.length);
+      expect(Number(row.o_win)).toBeCloseTo(ts.win, 9);
+      expect(row.o_cursor).toBe(i);
+      void playRound;
+    }
+  });
+
+  it("is not playable through the classic slot engine", async () => {
+    await expectError(play(`play_slot('slot_cosmic_cascade', 100, null)`), "GAME_UNAVAILABLE");
   });
 });
