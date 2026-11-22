@@ -131,6 +131,8 @@ export const sq: Dict = {
       videopoker: { deal: "Shpërndaj", draw: "Ndërro", hold: "Mbajtur", paytable: "Tabela e pagesave",
         hands: { royal_flush: "Royal flush", straight_flush: "Straight flush", four_of_a_kind: "Katërshe", full_house: "Full house",
           flush: "Flush", straight: "Rresht", three_of_a_kind: "Treshe", two_pair: "Dy çifte", jacks_or_better: "Xhandar ose më lart", nothing: "Pa fitim" } },
+      fruits: { spin: "Rrotullo", gamble: "Dyfisho", collect: "Merr", red: "E kuqe", black: "E zezë", pick: "Zgjidh ngjyrën – fito ×{m} ose humb fitimin", lines: "5 linja · paguan nga e majta · shumat për bastin aktual", scatter: "Scatter (kudo, × basti total)", win: "Fitim", lastWin: "Fitimi i fundit", maxSteps: "U arrit numri maksimal i dyfishimeve" },
+      jet: { bet: "Basti", bet1: "Basti 1", bet2: "Basti 2", auto: "Tërheqje automatike", cashout: "Tërhiq", flewAway: "Fluturoi!", waiting: "Vendos bastet", start: "Vë bast", addSecond: "Bast i dytë", history: "Raundet e tua të fundit", inFlight: "Në fluturim" },
       slot: { spin: "Rrotullo", paytable: "Tabela e pagesave", lines: "5 linja · tre simbole të njëjta paguajnë (shumëzuesi × basti)" },
     },
   },

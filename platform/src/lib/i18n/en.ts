@@ -129,6 +129,8 @@ export const en = {
       videopoker: { deal: "Deal", draw: "Draw", hold: "Held", paytable: "Pay table",
         hands: { royal_flush: "Royal flush", straight_flush: "Straight flush", four_of_a_kind: "Four of a kind", full_house: "Full house",
           flush: "Flush", straight: "Straight", three_of_a_kind: "Three of a kind", two_pair: "Two pair", jacks_or_better: "Jacks or better", nothing: "No win" } as Record<string, string> },
+      fruits: { spin: "Spin", gamble: "Gamble", collect: "Collect", red: "Red", black: "Black", pick: "Pick a colour – win ×{m} or lose the win", lines: "5 lines · pays from the left · amounts for the current bet", scatter: "Scatter (anywhere, × total bet)", win: "Win", lastWin: "Last win", maxSteps: "Maximum gamble steps reached" },
+      jet: { bet: "Bet", bet1: "Bet 1", bet2: "Bet 2", auto: "Auto cash-out", cashout: "Cash out", flewAway: "Flew away!", waiting: "Place your bets", start: "Bet", addSecond: "Second bet", history: "Your last rounds", inFlight: "In flight" },
       slot: { spin: "Spin", paytable: "Pay table", lines: "5 paylines · three of a kind pays (multiplier × stake)" },
     },
   },

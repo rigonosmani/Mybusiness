@@ -18,6 +18,8 @@ import { SlotGame } from "./slot";
 import { VideoPokerGame } from "./videopoker";
 import { ExternalGame } from "./external";
 import { CascadeGame } from "./cascade";
+import { JetGame } from "./jet";
+import { HotFruitsGame } from "./hot-fruits";
 
 export function GamePlayer({ id }: { id: string }) {
   const { t } = useI18n();
@@ -41,6 +43,8 @@ export function GamePlayer({ id }: { id: string }) {
     case "baccarat": return <BaccaratGame />;
     case "videopoker": return <VideoPokerGame />;
     case "slot_cosmic_cascade": return <CascadeGame gameId={id} />;
+    case "jet": return <JetGame />;
+    case "slot_hot_fruits": return <HotFruitsGame gameId={id} />;
     default: return g.category === "slots" ? <SlotGame gameId={id} /> : <EmptyState title={t.casino.unavailable} />;
   }
 }
