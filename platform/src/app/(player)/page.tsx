@@ -26,7 +26,7 @@ export default function HomePage() {
         <div className="relative max-w-xl">
           <p className="mb-2 text-sm font-semibold text-primary">{p.display_name}</p>
           <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl"><span className="text-gradient">Kometa</span> — {t.brand.tagline}</h1>
-          <p className="mt-3 text-muted-foreground">{t.demo.banner}</p>
+          <p className="mt-3 text-muted-foreground">{t.demo.hero}</p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Button asChild><Link href="/sports"><Trophy /> {t.nav.sports}</Link></Button>
             <Button asChild variant="secondary"><Link href="/casino/category/originals"><Sparkles /> {t.nav.originals}</Link></Button>

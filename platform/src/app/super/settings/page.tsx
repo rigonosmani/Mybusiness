@@ -5,7 +5,7 @@ import { Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, PageHeader } from "@/components/ui/card";
-import { Notice, SkeletonRows } from "@/components/ui/feedback";
+import { SkeletonRows } from "@/components/ui/feedback";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useAction } from "@/hooks/use-action";
@@ -26,7 +26,6 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <PageHeader title={t.super.settings.title} />
-      <Notice>{t.demo.banner}</Notice>
       <Card className="divide-y divide-border p-0">
         {q.isLoading && <div className="p-4"><SkeletonRows /></div>}
         {q.data?.map((s) => (

@@ -5,6 +5,8 @@ export const sq: Dict = {
   demo: {
     banner: "Platformë demo — kreditet (Cr) nuk kanë vlerë monetare dhe nuk mund të blihen, shiten apo tërhiqen.",
     short: "Vetëm kredite demo",
+    footnote: "Kreditet (Cr) nuk kanë vlerë monetare.",
+    hero: "Baste sportive, rezultate live dhe lojëra kazinoje origjinale – të gjitha në një vend.",
   },
   common: {
     save: "Ruaj", cancel: "Anulo", confirm: "Konfirmo", close: "Mbyll", search: "Kërko", loading: "Duke u ngarkuar…",
@@ -107,7 +109,7 @@ export const sq: Dict = {
     play: "Luaj", rules: "Rregullat", edge: "Avantazhi i shtëpisë", rtp: "RTP", provider: "Ofruesi", unavailable: "E padisponueshme",
     liveNotConfigured: "Lojërat me krupie live ofrohen vetëm nga studio të licencuara. Asnjë studio nuk është konfiguruar, ndaj këtu nuk ka asgjë për të shfaqur.",
     externalNotConfigured: "Slotet komerciale kërkojnë kontratë me një agregator të licencuar. Asnjë nuk është konfiguruar — slotet origjinale Kometa më poshtë janë plotësisht funksionale.",
-    fixedEdge: "Përcaktuar nga rregullat", originalDemo: "Implementim demo origjinal",
+    fixedEdge: "Përcaktuar nga rregullat", originalDemo: "Kometa Originals",
     stake: "Basti", half: "½", double: "2×", max: "Maks", bet: "Luaj", cashout: "Tërhiq", newRound: "Raund i ri",
     win: "Fituat", lose: "Pa fitim", profit: "Fitimi nëse fitoni", winChance: "Shansi i fitores", target: "Objektivi",
     recent: "Rezultatet e fundit", fairnessShort: "E drejtë e provueshme", nonce: "Nonce", round: "Raundi",

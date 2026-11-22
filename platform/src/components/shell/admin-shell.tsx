@@ -23,7 +23,7 @@ export function AdminShell({ items, children }: { items: NavItem[]; children: Re
         {p.role === "super_admin" ? t.nav.mainAdminArea : t.nav.adminArea}
       </p>
       <NavList items={items} onNavigate={() => setMenu(false)} />
-      <p className="mt-auto rounded-lg border border-border bg-panel-2 p-3 text-xs text-muted-foreground">{t.demo.banner}</p>
+      <p className="mt-auto px-3 text-[11px] text-muted-foreground/70">{t.demo.footnote}</p>
     </div>
   );
   return (

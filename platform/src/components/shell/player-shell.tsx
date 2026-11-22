@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import {
-  Activity, Dices, Gem, History, Home, Menu, Radio, Receipt, Scale, Search, ShieldCheck, Sparkles, Star, Trophy, User, Wallet,
+  Dices, Gem, History, Home, Menu, Radio, Receipt, Scale, Search, ShieldCheck, Sparkles, Star, Trophy, User, Wallet,
 } from "lucide-react";
 import { Logo } from "@/components/brand";
 import { Sheet } from "@/components/ui/dialog";
@@ -47,10 +47,7 @@ export function PlayerShell({ children }: { children: ReactNode }) {
         <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{t.nav.profile}</p>
         <NavList items={account} onNavigate={() => setMenu(false)} />
       </div>
-      <div className="mt-auto rounded-lg border border-border bg-panel-2 p-3 text-xs text-muted-foreground">
-        <Activity className="mb-1 size-4 text-primary" />
-        {t.demo.banner}
-      </div>
+      <p className="mt-auto px-3 text-[11px] text-muted-foreground/70">{t.demo.footnote}</p>
     </div>
   );
 
@@ -77,7 +74,6 @@ export function PlayerShell({ children }: { children: ReactNode }) {
               <UserMenu />
             </div>
           </div>
-          <div className="border-t border-border/60 bg-accent/10 px-4 py-1 text-center text-[11px] font-medium text-accent">{t.demo.short} · {t.demo.banner}</div>
         </header>
         <div className="flex flex-1">
           <main className="min-w-0 flex-1 px-3 py-5 sm:px-6">{children}</main>

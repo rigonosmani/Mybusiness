@@ -3,6 +3,8 @@ export const en = {
   demo: {
     banner: "Demo platform — credits (Cr) have no monetary value and cannot be bought, sold or withdrawn.",
     short: "Demo credits only",
+    footnote: "Credits (Cr) have no monetary value.",
+    hero: "Sports betting, live scores and original casino games – all in one place.",
   },
   common: {
     save: "Save", cancel: "Cancel", confirm: "Confirm", close: "Close", search: "Search", loading: "Loading…",
@@ -105,7 +107,7 @@ export const en = {
     play: "Play", rules: "Rules", edge: "House edge", rtp: "RTP", provider: "Provider", unavailable: "Unavailable",
     liveNotConfigured: "Live dealer content is only available from licensed studios. No studio is configured, so there is nothing to show here.",
     externalNotConfigured: "Commercial slot titles require a contract with a licensed aggregator. None is configured — the original Kometa slots below are fully playable.",
-    fixedEdge: "Fixed by the rules", originalDemo: "Original demo implementation",
+    fixedEdge: "Fixed by the rules", originalDemo: "Kometa Originals",
     stake: "Stake", half: "½", double: "2×", max: "Max", bet: "Bet", cashout: "Cash out", newRound: "New round",
     win: "You won", lose: "No win", profit: "Profit on win", winChance: "Win chance", target: "Target",
     recent: "Recent results", fairnessShort: "Provably fair", nonce: "Nonce", round: "Round",

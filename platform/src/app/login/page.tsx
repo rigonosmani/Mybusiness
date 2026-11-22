@@ -6,7 +6,6 @@ import { Logo } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Field, Input } from "@/components/ui/input";
-import { Notice } from "@/components/ui/feedback";
 import { LocaleSwitch } from "@/components/shell/locale-switch";
 import { useI18n } from "@/lib/i18n";
 import { supabaseBrowser } from "@/lib/supabase/client";
@@ -65,7 +64,7 @@ function LoginForm() {
         {error && <p role="alert" className="text-sm text-danger">{error}</p>}
         <Button type="submit" className="w-full" loading={pending}><LogIn /> {t.auth.submit}</Button>
       </form>
-      <div className="mt-6"><Notice>{t.demo.banner}</Notice></div>
+      <p className="mt-6 text-center text-xs text-muted-foreground">{t.demo.footnote}</p>
     </Card>
   );
 }
