@@ -1,5 +1,5 @@
 import {
-  Bomb, Coins, Crown, Dice5, Gem, Grid3x3, Rocket, Spade, Sparkles, Target, TrendingUp, Triangle, CircleDot, Club, Layers,
+  Bomb, Coins, Orbit, Crown, Dice5, Gem, Grid3x3, Rocket, Spade, Sparkles, Target, TrendingUp, Triangle, CircleDot, Club, Layers,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -20,6 +20,7 @@ const ART: Record<string, { icon: LucideIcon; from: string; to: string; motif: "
   videopoker: { icon: Club, from: "#2dd4bf", to: "#134e4a", motif: "grid" },
   slot_neon_orchard: { icon: Sparkles, from: "#f472b6", to: "#7e22ce", motif: "rays" },
   slot_astro_gems: { icon: Gem, from: "#60a5fa", to: "#312e81", motif: "dots" },
+  slot_cosmic_cascade: { icon: Orbit, from: "#a855f7", to: "#0e7490", motif: "rings" },
 };
 
 export function GameArt({ id, name, className, thumbnail }: { id: string; name: string; className?: string; thumbnail?: string | null }) {

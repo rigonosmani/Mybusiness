@@ -17,6 +17,7 @@ import { RouletteGame } from "./roulette";
 import { SlotGame } from "./slot";
 import { VideoPokerGame } from "./videopoker";
 import { ExternalGame } from "./external";
+import { CascadeGame } from "./cascade";
 
 export function GamePlayer({ id }: { id: string }) {
   const { t } = useI18n();
@@ -39,6 +40,7 @@ export function GamePlayer({ id }: { id: string }) {
     case "hilo": return <HiloGame edgeBps={edge} />;
     case "baccarat": return <BaccaratGame />;
     case "videopoker": return <VideoPokerGame />;
+    case "slot_cosmic_cascade": return <CascadeGame gameId={id} />;
     default: return g.category === "slots" ? <SlotGame gameId={id} /> : <EmptyState title={t.casino.unavailable} />;
   }
 }

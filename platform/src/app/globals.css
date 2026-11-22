@@ -37,6 +37,8 @@
   input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
 }
 
+@keyframes cascade-drop { from { transform: translateY(-60%); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes cascade-win { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
 @keyframes loadbar { 0% { transform: translateX(-100%); } 100% { transform: translateX(300%); } }
 
 @layer utilities {
