@@ -5,11 +5,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Radio, Search, Trophy } from "lucide-react";
 import { PageHeader } from "@/components/ui/card";
-import { EmptyState, ErrorState, SkeletonRows } from "@/components/ui/feedback";
+import { EmptyState, ErrorState, Notice, SkeletonRows } from "@/components/ui/feedback";
 import { Input } from "@/components/ui/input";
 import { useI18n } from "@/lib/i18n";
 import { errorMessage } from "@/lib/errors";
-import { fetchFixtures, fetchFreshness, fetchSportsTree } from "@/lib/sports";
+import { fetchFixtures, fetchFreshness, fetchSportsTree, isFresh } from "@/lib/sports";
 import { cn } from "@/lib/utils";
 import { FixtureRow } from "./fixture-row";
 
@@ -72,10 +72,13 @@ export function SportsBrowser({ live }: { live?: boolean }) {
         )}
       </div>
 
+      {live && (fixtures.data?.length ?? 0) > 0 && fresh.data && fixtures.data!.every((f) => !f.betting_markets.some((m) => m.status === "open" && isFresh(m, f, fresh.data!))) && (
+        <div className="mb-4"><Notice>{t.sports.liveLocked}</Notice></div>
+      )}
       {fixtures.isLoading || fresh.isLoading ? <SkeletonRows rows={6} /> :
         fixtures.error ? <ErrorState message={errorMessage(fixtures.error, t)} onRetry={() => fixtures.refetch()} retryLabel={t.common.retry} /> :
         grouped.length === 0 ? (
-          <EmptyState title={t.sports.noEvents}>{(tree.data?.sports.length ?? 0) === 0 ? t.sports.notConfigured : null}</EmptyState>
+          <EmptyState title={live ? t.sports.noLive : t.sports.noEvents}>{(tree.data?.sports.length ?? 0) === 0 ? t.sports.notConfigured : null}</EmptyState>
         ) : (
           <div className="space-y-6">
             {grouped.map(([name, list]) => (
