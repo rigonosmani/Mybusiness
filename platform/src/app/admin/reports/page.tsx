@@ -4,7 +4,10 @@ import { useState } from "react";
 import { Card, CardHeader, PageHeader, Stat } from "@/components/ui/card";
 import { ErrorState, SkeletonRows } from "@/components/ui/feedback";
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
-import { DailyChart, PeriodSelect, periodArgs } from "@/components/admin/charts";
+import dynamic from "next/dynamic";
+import { PeriodSelect, periodArgs } from "@/components/admin/period";
+
+const DailyChart = dynamic(() => import("@/components/admin/charts").then((m) => m.DailyChart), { ssr: false, loading: () => <div className="h-64 animate-pulse rounded-md bg-panel-2" /> });
 import { useI18n } from "@/lib/i18n";
 import { errorMessage } from "@/lib/errors";
 import { formatCredits } from "@/lib/money";
