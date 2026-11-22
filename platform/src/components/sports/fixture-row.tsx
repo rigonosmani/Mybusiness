@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
-import { isFresh, outcomeOrder, type Fixture } from "@/lib/sports";
+import { isFresh, liveClock, outcomeOrder, type Fixture } from "@/lib/sports";
 import { formatDateTime } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { OddsButton } from "./odds-button";
@@ -16,6 +16,7 @@ export function FixtureRow({ fixture, freshness }: { fixture: Fixture; freshness
   const outcomes = main ? [...main.market_outcomes].sort((a, b) => outcomeOrder.indexOf(a.outcome_key) - outcomeOrder.indexOf(b.outcome_key)) : [];
   const short = (k: string, label: string) => (k === "home" ? "1" : k === "away" ? "2" : k === "draw" ? "X" : label);
   const isLive = fixture.status === "live";
+  const clock = isLive ? liveClock(fixture) : null;
   // In-play without fresh odds: show a score card only (no locked buttons, no stale badge).
   const scoreOnly = isLive && (!main || !fresh || liveBlocked);
 
@@ -24,6 +25,7 @@ export function FixtureRow({ fixture, freshness }: { fixture: Fixture; freshness
       <Link href={`/sports/event/${fixture.id}`} className="min-w-0 flex-1 group">
         <div className="mb-1 flex items-center gap-2 text-xs text-muted-foreground">
           {fixture.status === "live" ? <Badge tone="danger">{t.sports.liveBadge}</Badge> : <span>{formatDateTime(fixture.commence_time, locale)}</span>}
+          {isLive && clock && <span className="font-semibold tabular-nums text-accent">{clock === "HT" ? t.sports.halfTime : clock}</span>}
           <span className="truncate">{fixture.leagues.name}</span>
           {main && !fresh && !isLive && <Badge tone="warning">{t.sports.stale}</Badge>}
         </div>

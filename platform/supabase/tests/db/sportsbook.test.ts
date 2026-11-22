@@ -176,7 +176,7 @@ describe("Test D — sports bet", () => {
     const [f] = await db.sql(`select status from fixtures where provider_event_id = 'L1'`);
     expect(f.status).toBe("live");
     await placeSingle(playerA1, o.id, "2.00", 10n); // fresh: accepted
-    await db.sql(`update betting_markets set last_odds_at = now() - interval '2 minutes' where fixture_id = (select id from fixtures where provider_event_id = 'L1')`);
+    await db.sql(`update betting_markets set last_odds_at = now() - interval '5 minutes' where fixture_id = (select id from fixtures where provider_event_id = 'L1')`);
     await expectError(placeSingle(playerA1, o.id, "2.00", 10n), "ODDS_STALE");
     const n = await db.service(`select svc_suspend_stale_markets() n`);
     expect(n[0].n).toBeGreaterThan(0);

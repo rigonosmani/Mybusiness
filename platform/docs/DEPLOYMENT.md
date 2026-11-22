@@ -12,7 +12,7 @@ Do **not** add the service-role key to Vercel. Set Supabase Auth *Site URL* and
 ```bash
 supabase link --project-ref <ref>
 supabase db push
-supabase functions deploy admin-users admin-integrations odds-sync casino-launch casino-provider-callback maintenance
+supabase functions deploy admin-users admin-integrations odds-sync casino-launch casino-provider-callback maintenance live-engine
 supabase secrets set AUTH_EMAIL_DOMAIN=... ALLOWED_ORIGINS=https://app.example CRON_SECRET=... \
   INTEGRATION_SECRETS_KEY=$(openssl rand -hex 32)   # encrypts API keys entered in the admin panel
 ```
@@ -34,6 +34,7 @@ select cron.schedule('maintenance', '*/5 * * * *', $$
     headers := jsonb_build_object('x-cron-secret', '<CRON_SECRET>'))$$);
 ```
 
+`live-engine` runs every minute (`* * * * *`, same header) and prices in-play football — see docs/LIVE.md.
 `odds-sync` itself enforces per-league intervals and the API budget, so running it often is cheap.
 
 ## CI

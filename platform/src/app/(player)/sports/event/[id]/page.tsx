@@ -9,7 +9,7 @@ import { ErrorState, Skeleton } from "@/components/ui/feedback";
 import { OddsButton } from "@/components/sports/odds-button";
 import { useI18n } from "@/lib/i18n";
 import { errorMessage } from "@/lib/errors";
-import { fetchFixture, fetchFreshness, isFresh, outcomeOrder } from "@/lib/sports";
+import { fetchFixture, fetchFreshness, isFresh, outcomeOrder, liveClock } from "@/lib/sports";
 import { formatDateTime } from "@/lib/utils";
 
 export default function EventPage({ params }: { params: Promise<{ id: string }> }) {
@@ -36,6 +36,8 @@ export default function EventPage({ params }: { params: Promise<{ id: string }> 
               <p className="text-3xl font-extrabold tabular-nums text-accent">{f.home_score ?? 0} : {f.away_score ?? 0}</p>
             ) : <p className="text-sm text-muted-foreground">{formatDateTime(f.commence_time, locale)}</p>}
             {f.status === "live" && <Badge tone="danger" className="mt-1">{t.sports.liveBadge}</Badge>}
+            {f.status === "live" && liveClock(f) && <p className="mt-1 text-sm font-semibold tabular-nums text-accent">{liveClock(f) === "HT" ? t.sports.halfTime : liveClock(f)}</p>}
+            {f.status === "live" && f.live_suspended_until && Date.parse(f.live_suspended_until) > Date.now() && <p className="mt-1 text-xs text-warning">{t.sports.liveSuspended}</p>}
           </div>
           <p className="text-lg font-bold">{f.away_team}</p>
         </div>

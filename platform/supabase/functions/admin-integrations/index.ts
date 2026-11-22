@@ -2,12 +2,14 @@
  * admin-integrations — Main Admin only.
  *   POST { action: "set_secret", integration, name, value }   value "" removes the secret
  *   POST { action: "sync_odds" }                               run the sports sync now
+ *   POST { action: "sync_live" }                               run Kometa Live now (polls the score source)
  * Secrets are encrypted in the database with INTEGRATION_SECRETS_KEY (Edge secret).
  */
 import { corsHeaders, errorCode, json, statusFor } from "../_shared/http.ts";
 import { requireCaller, serviceClient } from "../_shared/supabase.ts";
 import { secretsKey } from "../_shared/secrets.ts";
 import { runConfiguredSync } from "../_shared/sports/run.ts";
+import { runConfiguredLive } from "../_shared/sports/live-run.ts";
 
 const ALLOWED_NAMES = new Set(["api_key", "callback_secret"]);
 
@@ -36,6 +38,9 @@ Deno.serve(async (req) => {
 
     if (body.action === "sync_odds") {
       return json(req, 200, await runConfiguredSync(svc, { force: true }));
+    }
+    if (body.action === "sync_live") {
+      return json(req, 200, await runConfiguredLive(svc, { forcePoll: true }));
     }
     return json(req, 400, { error: "UNKNOWN_ACTION" });
   } catch (e) {

@@ -70,7 +70,7 @@ const steps = {
     console.log(`  ✓ function secrets set (ALLOWED_ORIGINS=${process.env.ALLOWED_ORIGINS ?? "*"})`);
   },
   async functions() {
-    const fns = ["admin-users", "admin-integrations", "odds-sync", "casino-launch", "casino-provider-callback", "maintenance"];
+    const fns = ["admin-users", "admin-integrations", "odds-sync", "casino-launch", "casino-provider-callback", "maintenance", "live-engine"];
     for (const fn of fns) {
       execSync(`npx --yes supabase@latest functions deploy ${fn} --project-ref ${REF} --use-api --yes`, {
         stdio: "inherit", env: { ...process.env, SUPABASE_ACCESS_TOKEN: TOKEN.startsWith("sbp_") ? TOKEN : "sbp_" + "0".repeat(40) },
@@ -82,10 +82,11 @@ const steps = {
     const fn = `https://${REF}.supabase.co/functions/v1`;
     const hdr = `jsonb_build_object('x-cron-secret', '${s.CRON_SECRET}', 'content-type', 'application/json')`;
     await sql(`create extension if not exists pg_cron; create extension if not exists pg_net;
-      select cron.unschedule(jobid) from cron.job where jobname in ('kometa-odds-sync', 'kometa-maintenance');
+      select cron.unschedule(jobid) from cron.job where jobname in ('kometa-odds-sync', 'kometa-maintenance', 'kometa-live');
       select cron.schedule('kometa-odds-sync', '*/15 * * * *', $$ select net.http_post('${fn}/odds-sync', '{}'::jsonb, '{}'::jsonb, ${hdr}) $$);
-      select cron.schedule('kometa-maintenance', '*/5 * * * *', $$ select net.http_post('${fn}/maintenance', '{}'::jsonb, '{}'::jsonb, ${hdr}) $$);`);
-    console.log("  ✓ cron: odds-sync every 15 min, maintenance every 5 min");
+      select cron.schedule('kometa-maintenance', '*/5 * * * *', $$ select net.http_post('${fn}/maintenance', '{}'::jsonb, '{}'::jsonb, ${hdr}) $$);
+      select cron.schedule('kometa-live', '* * * * *', $$ select net.http_post('${fn}/live-engine', '{}'::jsonb, '{}'::jsonb, ${hdr}) $$);`);
+    console.log("  ✓ cron: odds-sync every 15 min, maintenance every 5 min, live-engine every minute");
   },
   async keys() {
     const keys = await api("GET", "/api-keys?reveal=true");

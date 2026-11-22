@@ -49,6 +49,9 @@ verify_jwt = true
 [functions.odds-sync]
 verify_jwt = false   # protected by x-cron-secret
 
+[functions.live-engine]
+verify_jwt = false   # protected by x-cron-secret
+
 [functions.maintenance]
 verify_jwt = false   # protected by x-cron-secret
 

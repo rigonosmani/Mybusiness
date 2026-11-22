@@ -6,11 +6,13 @@ export interface Market { id: string; market_key: string; line: number | null; s
 export interface Fixture {
   id: string; home_team: string; away_team: string; commence_time: string; status: string;
   home_score: number | null; away_score: number | null; last_odds_at: string | null;
+  live_minute?: number | null; live_period?: string | null; live_updated_at?: string | null; live_suspended_until?: string | null;
   leagues: { id: string; name: string; sport_id: string };
   betting_markets: Market[];
 }
 
 const FIXTURE_SELECT = `id, home_team, away_team, commence_time, status, home_score, away_score, last_odds_at,
+  live_minute, live_period, live_updated_at, live_suspended_until,
   leagues!inner(id, name, sport_id),
   betting_markets(id, market_key, line, status, last_odds_at, bookmaker_count,
     market_outcomes(id, outcome_key, label, point, offered_odds, status, result))`;
@@ -64,3 +66,12 @@ export function isFresh(m: Market, fixture: Fixture, fr: { prematch: number; liv
 }
 
 export const outcomeOrder = ["home", "draw", "away", "over", "under", "yes", "no", "1X", "X2", "12"];
+
+/** Match clock shown to players: the source minute moved forward since it was observed. */
+export function liveClock(f: Pick<Fixture, "live_minute" | "live_period" | "live_updated_at">, now = Date.now()): string | null {
+  if (f.live_period === "HT") return "HT";
+  if (f.live_minute == null || !f.live_updated_at || (f.live_period !== "1H" && f.live_period !== "2H")) return null;
+  const m = Math.floor(f.live_minute + Math.max(0, (now - Date.parse(f.live_updated_at)) / 60_000));
+  const cap = f.live_period === "1H" ? 45 : 90;
+  return m > cap ? `${cap}+'` : `${m}'`;
+}
