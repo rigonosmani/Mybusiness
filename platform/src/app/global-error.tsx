@@ -1,10 +1,13 @@
 "use client";
+import { useEffect } from "react";
+import { reloadOnceForChunkError } from "@/lib/chunk-recovery";
 
 /**
  * Last-resort error screen (errors in the root layout). Inline styles on purpose:
  * it must stay readable even if the stylesheet or providers failed to load.
  */
 export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  useEffect(() => { reloadOnceForChunkError(error); }, [error]);
   return (
     <html lang="sq">
       <body style={{ background: "#0b1020", color: "#e8ecf6", fontFamily: "system-ui, sans-serif", margin: 0 }}>
