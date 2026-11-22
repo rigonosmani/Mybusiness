@@ -57,7 +57,7 @@ export default function SuperDashboard() {
         <Stat icon={<Receipt />} label={t.super.exposure} value={formatCredits(o.sportsbook.open_exposure)} sub={`${t.admin.openBets}: ${o.sportsbook.open_bets} · ${t.common.stake}: ${formatCredits(o.sportsbook.open_stake)}`} />
       </div>
       <Card><CardHeader title={t.super.wagering} /><DailyChart data={o.daily} /></Card>
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <Card>
           <CardHeader title={t.admin.gameActivity} description={`${t.super.gameAvailability}: ${o.games_availability.enabled} ${t.common.enabled.toLowerCase()} · ${o.games_availability.disabled} ${t.common.disabled.toLowerCase()}`} />
           <Table>

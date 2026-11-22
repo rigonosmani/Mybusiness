@@ -2,7 +2,8 @@ import type { HTMLAttributes, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("rounded-lg border border-border bg-panel p-4 sm:p-5", className)} {...props} />;
+  // min-w-0: inside grids a card must be allowed to shrink so wide tables scroll inside it.
+  return <div className={cn("min-w-0 rounded-lg border border-border bg-panel p-4 sm:p-5", className)} {...props} />;
 }
 
 export function CardHeader({ title, description, action }: { title: ReactNode; description?: ReactNode; action?: ReactNode }) {
