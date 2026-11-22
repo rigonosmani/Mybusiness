@@ -59,6 +59,7 @@ export const en = {
     NOT_AUTHENTICATED: "Please sign in again.", ACTIVE_ROUND: "A round is in progress.", INVALID_CLIENT_SEED: "Client seed: 1–64 letters, digits, '-' or '_'.",
     SECRETS_KEY_NOT_CONFIGURED: "Set INTEGRATION_SECRETS_KEY (32+ chars) in Edge Function secrets first.", PROVIDER_INCOMPLETE: "Provider needs base URL, API key and callback secret before activation.",
     INVALID_URL: "URL must start with https://", SECRETS_NOT_ALLOWED: "Do not put secrets in the JSON settings — use the key fields.", PROVIDER_ERROR: "The game provider returned an error.", PROVIDER_BAD_RESPONSE: "The game provider did not return a game URL.",
+    INVALID_CONFIG: "Settings must be a JSON object, e.g. {\"sports\": [\"soccer_epl\"], \"markets\": \"h2h,totals\"} — not the list of sports.", 
     UNKNOWN: "Something went wrong.",
   },
   wallet: {

@@ -51,7 +51,7 @@ export async function fetchFreshness() {
     .in("key", ["sportsbook.prematch_odds_max_age_seconds", "sportsbook.live_odds_max_age_seconds", "sportsbook.live_betting_enabled"]);
   const get = (k: string) => data?.find((r) => r.key === k)?.value;
   return {
-    prematch: Number(get("sportsbook.prematch_odds_max_age_seconds") ?? 7200),
+    prematch: Number(get("sportsbook.prematch_odds_max_age_seconds") ?? 46800),
     live: Number(get("sportsbook.live_odds_max_age_seconds") ?? 30),
     liveEnabled: get("sportsbook.live_betting_enabled") !== false,
   };

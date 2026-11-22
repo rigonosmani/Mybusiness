@@ -17,7 +17,7 @@ insert into public.platform_settings (key, value, description, locked) values
   ('sportsbook.max_bet_units', '1000000', 'Maximum sports stake (units).', false),
   ('sportsbook.max_payout_units', '100000000', 'Maximum potential payout of a bet (units).', false),
   ('sportsbook.max_selections', '20', 'Maximum selections in an accumulator.', false),
-  ('sportsbook.prematch_odds_max_age_seconds', '7200', 'Pre-match odds older than this are suspended.', false),
+  ('sportsbook.prematch_odds_max_age_seconds', '46800', 'Pre-match odds older than this are suspended. Must be longer than the odds sync interval (free plan: 12 h).', false),
   ('sportsbook.live_odds_max_age_seconds', '30', 'Live odds older than this are suspended.', false),
   ('sportsbook.live_betting_enabled', 'true', 'Accept bets on in-play fixtures (only with fresh odds).', false),
   ('platform.maintenance_mode', 'false', 'Block all wagering while true.', false),
@@ -102,7 +102,7 @@ on conflict (game_id) do nothing;
 
 insert into public.api_integrations (id, name, kind, config) values
   ('the_odds_api', 'The Odds API', 'sports_odds',
-   '{"regions": "eu", "markets": "h2h,spreads,totals", "sports": ["soccer_epl", "soccer_spain_la_liga", "soccer_italy_serie_a", "soccer_germany_bundesliga", "soccer_uefa_champs_league", "basketball_nba", "basketball_euroleague", "tennis_atp_aus_open_singles", "americanfootball_nfl", "icehockey_nhl", "baseball_mlb", "mma_mixed_martial_arts", "boxing_boxing"], "odds_interval_minutes": 60, "scores_interval_minutes": 30, "days_from": 3}'),
+   '{"regions": "eu", "markets": "h2h,totals", "sports": ["soccer_uefa_champs_league", "soccer_epl", "soccer_italy_serie_a"], "odds_interval_minutes": 720, "scores_interval_minutes": 120, "days_from": 2, "min_requests_remaining": 20}'),
   ('api_sports', 'API-Sports (API-Football)', 'sports_odds',
    '{"note": "Adapter scaffolded; enable once an API-Sports key and plan are configured."}')
 on conflict (id) do nothing;

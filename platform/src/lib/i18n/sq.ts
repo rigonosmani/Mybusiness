@@ -61,6 +61,7 @@ export const sq: Dict = {
     NOT_AUTHENTICATED: "Ju lutemi hyni përsëri.", ACTIVE_ROUND: "Një raund është në proces.", INVALID_CLIENT_SEED: "Fara e klientit: 1–64 shkronja, shifra, '-' ose '_'.",
     SECRETS_KEY_NOT_CONFIGURED: "Vendosni fillimisht INTEGRATION_SECRETS_KEY (32+ karaktere) te sekretet e Edge Functions.", PROVIDER_INCOMPLETE: "Ofruesi ka nevojë për URL bazë, çelës API dhe sekret callback-u para aktivizimit.",
     INVALID_URL: "URL-ja duhet të fillojë me https://", SECRETS_NOT_ALLOWED: "Mos vendosni sekrete në JSON — përdorni fushat e çelësave.", PROVIDER_ERROR: "Ofruesi i lojës ktheu gabim.", PROVIDER_BAD_RESPONSE: "Ofruesi i lojës nuk ktheu adresë loje.",
+    INVALID_CONFIG: "Cilësimet duhet të jenë objekt JSON, p.sh. {\"sports\": [\"soccer_epl\"], \"markets\": \"h2h,totals\"} — jo lista e sporteve.", 
     UNKNOWN: "Diçka shkoi keq.",
   },
   wallet: {

@@ -265,3 +265,13 @@ describe("Test F — sportsbook isolation", () => {
     expect(ok.r.profile.username).toBe("player_a1");
   });
 });
+
+describe("integration configuration", () => {
+  it("rejects a pasted provider list instead of a settings object", async () => {
+    await expectError(db.user(owner, `select admin_update_integration('the_odds_api', true, '[{"key": "soccer_epl"}]'::jsonb)`), "INVALID_CONFIG");
+    await expectError(db.user(owner, `select admin_update_integration('the_odds_api', true, '{"sports": []}'::jsonb)`), "INVALID_CONFIG");
+    await db.user(owner, `select admin_update_integration('the_odds_api', true, '{"sports": ["soccer_epl"], "markets": "h2h"}'::jsonb)`);
+    const [s] = await db.sql(`select value from platform_settings where key = 'sportsbook.prematch_odds_max_age_seconds'`);
+    expect(Number(s.value)).toBeGreaterThan(12 * 3600);
+  });
+});
