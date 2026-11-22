@@ -75,3 +75,4 @@ repeats B, C, D and F through the browser.
 - [Casino providers and licensed-content integration](docs/CASINO_PROVIDERS.md)
 - [Security, compliance gate, backups](docs/SECURITY.md)
 - [Deployment](docs/DEPLOYMENT.md)
+- [Publikimi në Hostinger + Supabase (shqip)](docs/DEPLOY_HOSTINGER.md)
