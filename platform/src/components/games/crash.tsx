@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { useI18n } from "@/lib/i18n";
 import { rpc } from "@/lib/rpc";
-import { cn } from "@/lib/utils";
-import { GameShell, RecentStrip, ResultBanner, StakeInput } from "./shell";
+import { formatCredits } from "@/lib/money";
+import { FlightCanvas, type FlightView } from "./flight-canvas";
+import { GameShell, RecentStrip, StakeInput } from "./shell";
 import { useGame, type RoundView } from "./use-game";
 
 type S = { started_at: string; growth: number; crash_point?: number; cashed_out_at?: number | null };
@@ -18,8 +19,8 @@ export function CrashGame() {
   const [auto, setAuto] = useState("");
   const [round, setRound] = useState<RoundView<S> | null>(null);
   const [display, setDisplay] = useState(1);
-  const [points, setPoints] = useState<number[]>([]);
   const origin = useRef(0); // local performance.now() corresponding to server elapsed 0
+  const view = useRef<FlightView>({ phase: "idle", origin: 0 });
 
   // Resume an in-progress round.
   useEffect(() => {
@@ -28,7 +29,7 @@ export function CrashGame() {
 
   function startLocal(r: RoundView<S>, serverElapsed = 0) {
     origin.current = performance.now() - serverElapsed * 1000;
-    setPoints([]);
+    view.current = { phase: "flying", origin: origin.current };
     setRound(r);
   }
 
@@ -37,29 +38,26 @@ export function CrashGame() {
   // Animate locally; poll the server once a second (the server decides crashes).
   useEffect(() => {
     if (!active || !round) return;
-    let raf = 0;
-    const tick = () => {
-      const sec = (performance.now() - origin.current) / 1000;
-      const m = multAt(sec);
-      setDisplay(m);
-      setPoints((p) => (p.length && p[p.length - 1] === m ? p : [...p, m].slice(-400)));
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
+    const tick = setInterval(() => setDisplay(multAt((performance.now() - origin.current) / 1000)), 100);
     const poll = setInterval(async () => {
       try {
         const s = await rpc<RoundView<S>>("crash_status", { p_round_id: round.round_id });
         if (s.status !== "active") finish(s);
-        else if (typeof s.elapsed === "number") origin.current = performance.now() - s.elapsed * 1000;
+        else if (typeof s.elapsed === "number") {
+          const o = performance.now() - s.elapsed * 1000;
+          if (Math.abs(o - origin.current) > 150) { origin.current = o; view.current.origin = o; }
+        }
       } catch { /* transient */ }
     }, 1000);
-    return () => { cancelAnimationFrame(raf); clearInterval(poll); };
+    return () => { clearInterval(tick); clearInterval(poll); };
   }, [active, round?.round_id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function finish(r: RoundView<S>) {
     g.setBalance(r.balance);
     setRound(r);
     setDisplay(Number(r.state.cashed_out_at ?? r.state.crash_point ?? 1));
+    view.current = { ...view.current, phase: "ended", endAt: Number(r.state.crash_point ?? 1), crashed: true, endedAt: performance.now(),
+      cashouts: r.state.cashed_out_at != null ? [Number(r.state.cashed_out_at)] : [] };
   }
 
   async function start() {
@@ -75,10 +73,6 @@ export function CrashGame() {
     if (r) finish(r);
   }
 
-  const crashed = round && round.status !== "active" && round.state.cashed_out_at == null;
-  const max = Math.max(2, ...points);
-  const path = points.map((m, i) => `${(i / Math.max(1, points.length - 1)) * 100},${100 - ((m - 1) / (max - 1)) * 90}`).join(" ");
-
   return (
     <GameShell gameId="crash"
       controls={<>
@@ -90,19 +84,14 @@ export function CrashGame() {
           <Button className="w-full" size="lg" onClick={start} loading={g.busy} disabled={!g.stakeUnits}>{t.casino.games.crash.start}</Button>
         )}
       </>}
-      stage={<>
-        {round && round.status !== "active" && <ResultBanner status={round.status} multiplier={round.multiplier} payout={round.payout} />}
-        <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full p-6" aria-hidden>
-          <polyline points={path} fill="none" stroke={crashed ? "hsl(var(--danger))" : "hsl(var(--primary))"} strokeWidth="1.2" vectorEffect="non-scaling-stroke" />
-        </svg>
-        <div className="relative text-center">
-          <p className={cn("text-7xl font-extrabold tabular-nums", crashed ? "text-danger" : round?.status === "won" ? "text-success" : "text-foreground")}>{display.toFixed(2)}×</p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {active ? t.casino.games.crash.flying : crashed ? `${t.casino.games.crash.crashed} ${Number(round?.state.crash_point).toFixed(2)}×`
-              : round ? `${t.casino.games.crash.cashedOut} ${Number(round.state.cashed_out_at).toFixed(2)}× · ${t.casino.games.crash.crashed} ${Number(round.state.crash_point).toFixed(2)}×` : ""}
+      stage={<div className="relative h-[360px] w-full overflow-hidden rounded-xl sm:h-[420px]">
+        <FlightCanvas view={view} sprite="rocket" labels={{ flewAway: t.casino.games.crash.crashed, waiting: t.casino.games.crash.start }} />
+        {round && round.status === "won" && (
+          <p key={round.round_id} className="absolute inset-x-0 top-[62%] animate-[win-pop_.45s_ease-out] text-center text-2xl font-black text-success drop-shadow">
+            {t.casino.games.crash.cashedOut} {Number(round.state.cashed_out_at).toFixed(2)}× · +{formatCredits(round.payout)}
           </p>
-        </div>
-      </>}
+        )}
+      </div>}
       footer={<RecentStrip items={g.history} />}
     />
   );

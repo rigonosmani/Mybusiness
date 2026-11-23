@@ -1,12 +1,14 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
 import { Bell, Cherry, Citrus, Diamond, Gem, Grape, Hexagon, Orbit, Sparkle, Star, Heart, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { rpc } from "@/lib/rpc";
+import { formatCredits } from "@/lib/money";
 import { cn } from "@/lib/utils";
-import { GameShell, RecentStrip, ResultBanner, StakeInput } from "./shell";
+import { Reels, useCountUp } from "./reels";
+import { GameShell, RecentStrip, StakeInput } from "./shell";
 import { useGame, type RoundView } from "./use-game";
 
 type S = { grid: string[]; wins: { line: number; symbol: string; multiplier: number }[] };
@@ -21,8 +23,15 @@ const LINES = [[0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
 function Symbol({ id, big }: { id: string; big?: boolean }) {
   const s = SYMBOLS[id] ?? { text: "?", color: "" };
   const Icon = s.icon;
-  return Icon ? <Icon className={cn(big ? "size-10 sm:size-14" : "size-5", s.color)} strokeWidth={1.8} />
-    : <span className={cn("font-black", big ? "text-4xl sm:text-6xl" : "text-lg", s.color)}>{s.text}</span>;
+  if (big) {
+    return (
+      <div className="grid size-full place-items-center rounded-xl bg-gradient-to-b from-white/10 to-black/20 shadow-[inset_0_1px_0_rgba(255,255,255,.15)]">
+        {Icon ? <Icon className={cn("size-3/5 drop-shadow-[0_0_10px_currentColor]", s.color)} strokeWidth={1.8} />
+          : <span className={cn("text-[3.2rem] font-black leading-none drop-shadow-[0_0_10px_currentColor] sm:text-6xl", s.color)}>{s.text}</span>}
+      </div>
+    );
+  }
+  return Icon ? <Icon className={cn("size-5", s.color)} strokeWidth={1.8} /> : <span className={cn("text-lg font-black", s.color)}>{s.text}</span>;
 }
 
 export function SlotGame({ gameId }: { gameId: string }) {
@@ -31,28 +40,29 @@ export function SlotGame({ gameId }: { gameId: string }) {
   const pay = useQuery({ queryKey: ["slot-pay", gameId], queryFn: () => rpc<{ id: string; line_multiplier: number }[]>("slot_paytable", { p_game_id: gameId }) });
   const ids = pay.data?.map((p) => p.id) ?? Object.keys(SYMBOLS).slice(0, 6);
   const [grid, setGrid] = useState<string[]>(() => Array.from({ length: 9 }, (_, i) => ids[i % ids.length]));
+  const [spinId, setSpinId] = useState(0);
+  const [target, setTarget] = useState<string[] | null>(null);
   const [spinning, setSpinning] = useState(false);
   const [last, setLast] = useState<RoundView<S> | null>(null);
-
-  useEffect(() => {
-    if (!spinning) return;
-    const id = setInterval(() => setGrid(Array.from({ length: 9 }, () => ids[Math.floor(Math.random() * ids.length)])), 70);
-    return () => clearInterval(id);
-  }, [spinning, ids.join()]); // eslint-disable-line react-hooks/exhaustive-deps
+  const pending = useRef<RoundView<S> | null>(null);
+  const shownWin = useCountUp(last && !spinning ? Number(last.payout) : 0, 900);
 
   async function spin() {
     const units = g.units();
-    if (!units) return;
-    setLast(null);
-    setSpinning(true);
-    const started = Date.now();
-    const r = await g.call<S>("play_slot", { p_game_id: gameId, p_stake: units });
-    setTimeout(() => {
-      setSpinning(false);
-      if (r) { setGrid(r.state.grid); setLast(r); }
-    }, Math.max(0, 700 - (Date.now() - started)));
+    if (!units || spinning) return;
+    setLast(null); setTarget(null); setSpinning(true); setSpinId((n) => n + 1);
+    const r = await g.call<S>("play_slot", { p_game_id: gameId, p_stake: units }, { deferBalance: true });
+    pending.current = r;
+    setTarget(r ? r.state.grid : grid);
+  }
+  function landed() {
+    const r = pending.current;
+    setSpinning(false);
+    if (!r) return;
+    setGrid(r.state.grid); setLast(r); g.setBalance(r.balance);
   }
   const winning = new Set((last?.state.wins ?? []).flatMap((w) => LINES[w.line]));
+
 
   return (
     <GameShell gameId={gameId}
@@ -72,18 +82,26 @@ export function SlotGame({ gameId }: { gameId: string }) {
           </div>
         </div>
       </>}
-      stage={<div className="p-4">
-        {last && <ResultBanner status={last.status} multiplier={last.multiplier} payout={last.payout} />}
-        <div className="grid grid-cols-3 gap-2 rounded-2xl border-4 border-primary/30 bg-gradient-to-b from-panel-3 to-panel p-3 shadow-[inset_0_0_40px_rgba(0,0,0,.5)]">
-          {[0, 1, 2].map((row) => [0, 1, 2].map((col) => {
-            const i = col * 3 + row;
-            return (
-              <div key={i} className={cn("grid size-20 place-items-center rounded-xl bg-background/60 sm:size-28", spinning && "blur-[1px]",
-                winning.has(i) && "animate-pop ring-4 ring-accent")}>
-                <Symbol id={grid[i]} big />
-              </div>
-            );
-          }))}
+      stage={<div className="w-full max-w-md p-4">
+        <div className="relative rounded-2xl bg-gradient-to-b from-primary/60 via-primary/20 to-accent/50 p-1.5 shadow-[0_0_40px_hsl(var(--primary)/.35)]">
+          <div className="relative grid grid-cols-3 gap-2 rounded-xl bg-gradient-to-b from-panel-3 to-background p-2 shadow-[inset_0_0_40px_rgba(0,0,0,.6)]">
+            <Reels cols={3} rows={3} grid={grid} spinId={spinId} target={target} pool={ids} render={(id) => <Symbol id={id} big />}
+              winning={winning} onAllStopped={landed} stagger={220} colClassName="rounded-lg bg-background/60" />
+            {last && !spinning && (
+              <svg viewBox="0 0 300 300" preserveAspectRatio="none" className="pointer-events-none absolute inset-2 size-[calc(100%-1rem)]" aria-hidden>
+                {last.state.wins.map((w) => (
+                  <polyline key={w.line} fill="none" stroke="hsl(var(--accent))" strokeWidth="5" strokeLinecap="round" pathLength={1} strokeDasharray="1"
+                    style={{ animation: "line-draw .5s ease-out both", filter: "drop-shadow(0 0 6px hsl(var(--accent)))" }}
+                    points={LINES[w.line].map((i) => `${Math.floor(i / 3) * 100 + 50},${(i % 3) * 100 + 50}`).join(" ")} />
+                ))}
+              </svg>
+            )}
+          </div>
+        </div>
+        <div className="mt-3 flex min-h-10 items-center justify-center">
+          {last && !spinning && (Number(last.payout) > 0
+            ? <p key={last.round_id} className="animate-[win-pop_.45s_ease-out] text-3xl font-black tabular-nums text-accent">+{formatCredits(shownWin)}</p>
+            : <p className="text-sm text-muted-foreground">{t.common.lost}</p>)}
         </div>
       </div>}
       footer={<RecentStrip items={g.history} />}

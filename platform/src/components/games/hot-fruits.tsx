@@ -1,6 +1,6 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { fetchGames } from "@/lib/casino";
 import { useI18n } from "@/lib/i18n";
@@ -8,6 +8,7 @@ import { formatCredits } from "@/lib/money";
 import { rpc } from "@/lib/rpc";
 import { cn } from "@/lib/utils";
 import { FRUIT_IDS, FruitSymbol } from "./fruit-symbols";
+import { CoinBurst, Reels, useCountUp } from "./reels";
 import { GameShell, RecentStrip, StakeInput } from "./shell";
 import { useGame, type RoundView } from "./use-game";
 
@@ -29,37 +30,34 @@ export function HotFruitsGame({ gameId }: { gameId: string }) {
   const gambleMult = Math.floor(2 * (1 - coinEdge / 10000) * 10000) / 10000;
 
   const [grid, setGrid] = useState<string[]>(randomGrid);
-  const [stopped, setStopped] = useState(5); // number of reels that have stopped
+  const [spinId, setSpinId] = useState(0);
+  const [target, setTarget] = useState<string[] | null>(null);
+  const [spinning, setSpinning] = useState(false);
   const [last, setLast] = useState<RoundView<S> | null>(null);
   const [win, setWin] = useState(0);              // current collectable win (units)
   const [gamble, setGamble] = useState<{ step: number; card: null | { color: "red" | "black"; suit: string }; lost: boolean } | null>(null);
-  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const spinning = stopped < 5;
-
-  // Blur-spin the reels that are still moving.
-  useEffect(() => {
-    if (!spinning) return;
-    const id = setInterval(() => setGrid((cur) => cur.map((s, i) => (Math.floor(i / 3) >= stopped ? FRUIT_IDS[Math.floor(Math.random() * FRUIT_IDS.length)] : s))), 60);
-    return () => clearInterval(id);
-  }, [spinning, stopped]);
-  useEffect(() => () => timers.current.forEach(clearTimeout), []);
+  const pending = useRef<RoundView<S> | null>(null);
+  const shownWin = useCountUp(last && !spinning ? Number(last.payout) : 0, 1000);
 
   async function spin() {
     const units = g.units();
     if (!units || spinning) return;
-    setLast(null); setGamble(null); setWin(0);
-    setStopped(0);
-    const started = Date.now();
+    setLast(null); setGamble(null); setWin(0); setTarget(null);
+    setSpinning(true);
+    setSpinId((n) => n + 1);
     const r = await g.call<S>("play_lines", { p_game_id: gameId, p_stake: units }, { deferBalance: true });
-    if (!r) { setStopped(5); return; }
-    const base = Math.max(0, 450 - (Date.now() - started));
-    for (let c = 0; c < 5; c++) {
-      timers.current.push(setTimeout(() => {
-        setGrid((cur) => cur.map((s, i) => (Math.floor(i / 3) === c ? r.state.grid[i] : s)));
-        setStopped(c + 1);
-        if (c === 4) { setLast(r); setWin(Number(r.payout)); g.setBalance(r.balance); }
-      }, base + c * 170));
-    }
+    pending.current = r;
+    setTarget(r ? r.state.grid : grid); // on error the reels land back where they were
+  }
+
+  function landed() {
+    const r = pending.current;
+    setSpinning(false);
+    if (!r) return;
+    setGrid(r.state.grid);
+    setLast(r);
+    setWin(Number(r.payout));
+    g.setBalance(r.balance);
   }
 
   async function pick(color: "red" | "black") {
@@ -73,7 +71,7 @@ export function HotFruitsGame({ gameId }: { gameId: string }) {
     setWin(won ? Number(r.payout) : 0);
   }
 
-  const lines = pay.data?.lines ?? [];
+  const lines = useMemo(() => pay.data?.lines ?? [], [pay.data]);
   const winCells = useMemo(() => {
     const s = new Set<number>();
     for (const w of last?.state.wins ?? []) {
@@ -132,36 +130,36 @@ export function HotFruitsGame({ gameId }: { gameId: string }) {
         </div>
       </>}
       stage={<div className="w-full max-w-2xl p-2 sm:p-4">
-        <div className="relative rounded-2xl bg-gradient-to-b from-[#ffcf4a] via-[#ff7a00] to-[#b30000] p-1.5 shadow-[0_0_40px_rgba(255,90,0,.45)]">
+        <div className={cn("relative rounded-2xl bg-gradient-to-b from-[#ffcf4a] via-[#ff7a00] to-[#b30000] p-1.5 shadow-[0_0_40px_rgba(255,90,0,.45)]",
+          last && Number(last.payout) > 0 && !spinning && "animate-[frame-glow_1.2s_ease-in-out_3]")}>
           <div className="relative rounded-xl bg-[radial-gradient(ellipse_at_top,#4a0b00,#140200_70%)] p-2 sm:p-3">
             <div className="relative grid grid-cols-5 gap-1.5 sm:gap-2">
-              {[0, 1, 2, 3, 4].map((col) => (
-                <div key={col} className="grid grid-rows-3 gap-1.5 rounded-lg bg-gradient-to-b from-[#2a0600] via-[#3d0a00] to-[#2a0600] p-1 shadow-[inset_0_0_12px_rgba(0,0,0,.8)] sm:gap-2">
-                  {[0, 1, 2].map((row) => {
-                    const i = col * 3 + row;
-                    return (
-                      <div key={row} className={cn("aspect-square rounded-md p-1 transition-transform", col >= stopped && "blur-[2px]",
-                        winCells.has(i) && "animate-pop bg-amber-300/20 ring-2 ring-amber-300")}>
-                        <FruitSymbol id={grid[i]} />
-                      </div>
-                    );
-                  })}
-                </div>
-              ))}
+              <Reels cols={5} rows={3} grid={grid} spinId={spinId} target={target} pool={FRUIT_IDS} render={(id) => <FruitSymbol id={id} />}
+                winning={winCells} onAllStopped={landed}
+                colClassName="rounded-lg bg-gradient-to-b from-[#2a0600] via-[#4a0d00] to-[#2a0600] shadow-[inset_0_0_14px_rgba(0,0,0,.85)]" />
               {last && !spinning && (
                 <svg viewBox="0 0 500 300" preserveAspectRatio="none" className="pointer-events-none absolute inset-0 size-full" aria-hidden>
                   {last.state.wins.filter((w) => w.line !== null).map((w) => (
-                    <polyline key={w.line} fill="none" stroke={LINE_COLORS[w.line!]} strokeWidth="5" strokeLinejoin="round" opacity=".85"
+                    <polyline key={w.line} fill="none" stroke={LINE_COLORS[w.line!]} strokeWidth="6" strokeLinejoin="round" strokeLinecap="round" opacity=".9"
+                      pathLength={1} strokeDasharray="1" style={{ animation: "line-draw .55s ease-out both", filter: `drop-shadow(0 0 6px ${LINE_COLORS[w.line!]})` }}
                       points={lines[w.line!].map((i) => `${Math.floor(i / 3) * 100 + 50},${(i % 3) * 100 + 50}`).join(" ")} />
                   ))}
                 </svg>
               )}
             </div>
+            {last && !spinning && Number(last.payout) >= Number(last.stake) * 10 && (
+              <div key={last.round_id} className="pointer-events-none absolute inset-0 grid place-items-center">
+                <CoinBurst />
+                <p className="animate-[win-pop_.6s_ease-out] rounded-xl bg-black/60 px-5 py-2 text-3xl font-black uppercase tracking-wide text-amber-300 drop-shadow-[0_0_18px_rgba(255,200,0,.9)] sm:text-5xl">
+                  {Number(last.payout) >= Number(last.stake) * 50 ? "MEGA WIN" : "BIG WIN"}
+                </p>
+              </div>
+            )}
           </div>
         </div>
         <div className="mt-3 flex min-h-12 items-center justify-center text-center">
           {last && !spinning && !gamble && (Number(last.payout) > 0
-            ? <p className="text-2xl font-extrabold text-amber-300 drop-shadow">{tf.win} {formatCredits(last.payout)}</p>
+            ? <p key={last.round_id} className="animate-[win-pop_.45s_ease-out] text-3xl font-black tabular-nums text-amber-300 drop-shadow-[0_0_12px_rgba(255,200,0,.6)]">{tf.win} {formatCredits(shownWin)}</p>
             : <p className="text-sm text-muted-foreground">{t.common.lost}</p>)}
         </div>
         {gamble && (
